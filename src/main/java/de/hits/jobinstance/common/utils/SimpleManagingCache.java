@@ -233,23 +233,25 @@ public class SimpleManagingCache<K, V> {
 			}
 		});
 
-		StringBuilder msg = new StringBuilder();
-		msg.append("Monitoring:\n");
-		msg.append("  Requests:\n");
-		msg.append(String.format("    Inserted entries:  %s\n", insertedCount));
-		msg.append(String.format("    Removed entries:   %s\n", removedCount));
-		msg.append(String.format("    Requested entries: %s\n", requestedCount));
-		msg.append(String.format("    Actions summary:   %s\n", sumRequests));
-		msg.append("  Cache health:\n");
-		msg.append(String.format("    Actual cache size: %s\n", cacheSize));
-		msg.append("   .=============================.\n");
-		msg.append("   | Age in minutes | Count      |\n");
-		msg.append("   .-----------------------------.\n");
-		reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
-				entry -> msg.append(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
-		msg.append("   .=============================.");
+		if (loggingEnabled) {
+			StringBuilder msg = new StringBuilder();
+			msg.append("Monitoring:\n");
+			msg.append("  Requests:\n");
+			msg.append(String.format("    Inserted entries:        %s\n", insertedCount));
+			msg.append(String.format("    Removed entries:         %s\n", removedCount));
+			msg.append(String.format("    Requested entries:       %s\n", requestedCount));
+			msg.append(String.format("    Actions summary:         %s\n", sumRequests));
+			msg.append("  Cache health:\n");
+			msg.append(String.format("    Actual cache size:       %s\n", cacheSize));
+			msg.append("   .=============================.\n");
+			msg.append("   | Age in minutes | Count      |\n");
+			msg.append("   .-----------------------------.\n");
+			reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
+					entry -> msg.append(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
+			msg.append("   .=============================.");
 
-		log.info(msg.toString());
+			log.info(msg.toString());
+		}
 	}
 
 	/**
