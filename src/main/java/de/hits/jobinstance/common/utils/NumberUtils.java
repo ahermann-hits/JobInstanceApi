@@ -1,25 +1,49 @@
 package de.hits.jobinstance.common.utils;
 
+/**
+ * A minimal version of my NumberUtils, only with the methods I need in this
+ * project.
+ * 
+ * @author André Hermann
+ * @since 08.02.2018
+ * @version 1.0
+ */
 public class NumberUtils {
 
-	public static boolean isEmpty(Number num) {
-		if (num == null) {
-			return true;
+	public static boolean isEmpty(Number number) {
+		boolean result = true;
+
+		if (number != null && isNumber(number)) {
+			result = false;
 		}
-		if (isNumber(num)) {
-			return false;
-		}
-		return true;
+
+		return result;
 	}
 
-	public static Integer getInteger(Object input) {
+	public static boolean isNumber(Object number) {
+		boolean result = false;
+
+		if (number instanceof Number) {
+			result = true;
+		} else if (number instanceof String) {
+			try {
+				Double.parseDouble((String) number);
+				result = true;
+			} catch (NumberFormatException nfe) {
+			}
+		}
+
+		return result;
+	}
+
+	public static Integer getInteger(Object number) {
 		Integer result = null;
 
-		if (input instanceof Number) {
-			result = ((Number) input).intValue();
-		} else if (input instanceof String) {
+		if (number instanceof Number) {
+			result = ((Number) number).intValue();
+		} else if (number instanceof String) {
 			try {
-				result = Integer.parseInt((String) input);
+				result = Integer.parseInt((String) number);
 			} catch (Exception e) {
 			}
 		}
@@ -27,14 +51,14 @@ public class NumberUtils {
 		return result;
 	}
 
-	public static Long getLong(Object input) {
+	public static Long getLong(Object number) {
 		Long result = null;
 
-		if (input instanceof Number) {
-			result = ((Number) input).longValue();
-		} else if (input instanceof String) {
+		if (number instanceof Number) {
+			result = ((Number) number).longValue();
+		} else if (number instanceof String) {
 			try {
-				result = Long.parseLong((String) input);
+				result = Long.parseLong((String) number);
 			} catch (Exception e) {
 			}
 		}
@@ -42,32 +66,18 @@ public class NumberUtils {
 		return result;
 	}
 
-	public static long getNullSaveLong(Object input) {
-		if (input instanceof Number) {
-			return ((Number) input).longValue();
-		} else if (input instanceof String) {
-			String s = (String) input;
-			if (s == null || s.isEmpty()) {
-				return 0;
-			}
-			return Long.parseLong((String) s);
-		} else {
-			return 0;
-		}
-	}
+	public static long getNullSaveLong(Object number) {
+		Long result = 0l;
 
-	public static boolean isNumber(Object o) {
-		if (o instanceof Number) {
-			return true;
-		} else if (o instanceof String) {
+		if (number instanceof Number) {
+			result = ((Number) number).longValue();
+		} else if (number instanceof String) {
 			try {
-				Double.parseDouble((String) o);
-				return true;
-			} catch (NumberFormatException nfe) {
-				return false;
+				result = Long.parseLong((String) number);
+			} catch (Exception e) {
 			}
-		} else {
-			return false;
 		}
+
+		return result;
 	}
 }

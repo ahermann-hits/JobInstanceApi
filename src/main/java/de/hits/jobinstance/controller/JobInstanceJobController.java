@@ -1,6 +1,7 @@
 package de.hits.jobinstance.controller;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,9 +202,14 @@ public class JobInstanceJobController {
 
 		counterSaved.getAndIncrement();
 
-		long jobInstanceId = resource.getCurrentJob().getJobInstanceId();
+		JobInstanceStatusJson currentJob = resource.getCurrentJob();
+		long jobInstanceId = currentJob.getJobInstanceId();
 		// little check
 		if (jobInstanceId == id && this.workCache.containsKey(jobInstanceId)) {
+			if (currentJob.getJobEnded() == null) {
+				currentJob.setJobEnded(LocalDateTime.now());
+			}
+
 			if (this.useWriteCache) {
 				this.writeCache.put(jobInstanceId, resource);
 			} else {

@@ -3,13 +3,16 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>de.hits</groupId>
-	<artifactId>job-instance</artifactId>
+	<groupId>de.hits.jobinstance</groupId>
+	<artifactId>job-instance-api</artifactId>
 	<version>0.0.1.RELEASE</version>
 	<packaging>jar</packaging>
 
 	<name>JobInstance REST API</name>
 	<description></description>
+	<organization>
+		<name>HiTS</name>
+	</organization>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -94,7 +97,8 @@
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<version>2.7.0</version>
+			<!-- The actual version of swagger ui is not working very well, that is why I had chosen this old version. -->
+			<version>2.6.0</version>
 			<scope>compile</scope>
 		</dependency>
 

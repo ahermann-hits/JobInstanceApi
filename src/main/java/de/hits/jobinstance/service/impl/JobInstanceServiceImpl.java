@@ -293,7 +293,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			job.setReturnMessage(json.getReturnMessage());
 			job.setHostName(json.getHostName());
 			job.setHostPid(json.getHostPid());
-			job.setHostName(json.getHostName());
+			job.setHostUser(json.getHostUser());
 		}
 
 		return job;
@@ -460,72 +460,15 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public void persistJobInstance(JobInstanceJobJson job) {
+	public Long persistJobInstance(JobInstanceJobJson job) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#persistJobInstance()");
 		}
 
-		JobInstanceStatusJson jobInstanceJson = job.getCurrentJob();
-		List<JobInstanceCounterJson> counterJson = job.getCounters();
+		Map<Long, JobInstanceJobJson> jobToSave = new HashMap<>();
+		jobToSave.put(job.getCurrentJob().getJobInstanceId(), job);
 
-		List<JobInstanceCounter> counterToSave = new ArrayList<>();
-
-		int countInput = 0;
-		int countInsert = 0;
-		int countUpdate = 0;
-		int countReject = 0;
-		int countDelete = 0;
-
-		if (counterJson != null && !counterJson.isEmpty()) {
-			for (JobInstanceCounterJson counter : counterJson) {
-				CounterType counterType;
-				try {
-					Catalog counterTypeCatalog = this.counterCatalogs.get(counter.getCounterType());
-
-					counterType = CounterType.valueBySysname(counterTypeCatalog.getSysname());
-					switch (counterType) {
-					case FETCH:
-						countInput += counter.getCounterValue();
-						break;
-					case INSERT:
-						countInsert += counter.getCounterValue();
-						break;
-					case UPDATE:
-						countUpdate += counter.getCounterValue();
-						break;
-					case REJECT:
-						countReject += counter.getCounterValue();
-						break;
-					case DELETE:
-						countDelete += counter.getCounterValue();
-						break;
-					}
-				} catch (NotFoundException e) {
-					e.printStackTrace();
-				}
-			}
-
-			if (counterJson.size() == 1) {
-				counterToSave.add(convertJsonToCounter(counterJson.get(0)));
-			} else {
-				counterJson.forEach(counter -> counterToSave.add(convertJsonToCounter(counter)));
-			}
-		}
-
-		jobInstanceJson.setCountInput(countInput);
-		jobInstanceJson.setCountInsert(countInsert);
-		jobInstanceJson.setCountUpdate(countUpdate);
-		jobInstanceJson.setCountReject(countReject);
-		jobInstanceJson.setCountDelete(countDelete);
-
-		JobInstanceStatus savedJob = saveJob(convertJsonToJob(jobInstanceJson));
-		job.setCurrentJob(convertJobToJson(savedJob));
-		if (!counterToSave.isEmpty()) {
-			List<JobInstanceCounter> savedCounter = saveAllCounters(counterToSave);
-			List<JobInstanceCounterJson> savedCounterJson = savedCounter.stream()
-					.map(counter -> convertCounterToJson(counter)).collect(Collectors.toList());
-			job.setCounters(savedCounterJson);
-		}
+		return persistJobInstanceAll(jobToSave).get(0);
 	}
 
 	@Override
@@ -590,15 +533,6 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			jobInstanceJson.setCountDelete(countDelete);
 
 			jobsToSave.put(jobInstanceJson.getJobInstanceId(), convertJsonToJob(jobInstanceJson));
-//			JobInstanceStatus savedJob = saveJob(convertJsonToJob(jobInstanceJson));
-//			job.setCurrentJob(convertJobToJson(savedJob));
-
-//			if (!counterToSave.isEmpty()) {
-//				List<JobInstanceCounter> savedCounter = saveAllCounters(counterToSave);
-//				List<JobInstanceCounterJson> savedCounterJson = savedCounter.stream()
-//						.map(counter -> convertCounterToJson(counter)).collect(Collectors.toList());
-//				job.setCounters(savedCounterJson);
-//			}
 		}
 
 		if (!jobsToSave.isEmpty()) {

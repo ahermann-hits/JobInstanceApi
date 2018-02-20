@@ -163,8 +163,14 @@ public class SimpleManagingCache<K, V> {
 		long cleanStart = System.nanoTime();
 		int sizeBeforCleansing = cacheMap.size();
 
+		StringBuilder killedMsg = new StringBuilder();
+
 		cacheMap.forEach(parallelismThreshold, (k, v) -> {
 			if (v.created < thresholdAge) {
+				if (loggingEnabled) {
+					killedMsg.append(String.format("    - %s\n", v.value.toString()));
+				}
+
 				deleteCounter.incrementAndGet();
 				killed.incrementAndGet();
 				cacheMap.remove(k);
@@ -177,10 +183,14 @@ public class SimpleManagingCache<K, V> {
 
 			StringBuilder msg = new StringBuilder();
 			msg.append("Cleansing:\n");
-			msg.append(String.format("  Cache size befor cleaning: %s\n", sizeBeforCleansing));
-			msg.append(String.format("  Cleaned entries:           %s (sum: %s)\n", deleteCounter.get(), killed.get()));
-			msg.append(String.format("  Cache size after cleaning: %s\n", cacheMap.size()));
+			msg.append(String.format("  Cache size before cleaning: %s\n", sizeBeforCleansing));
+			msg.append(String.format("  Cleaned entries:            %s (sum: %s)\n", deleteCounter.get(), killed.get()));
+			msg.append(String.format("  Cache size after cleaning:  %s\n", cacheMap.size()));
 			msg.append(String.format("  Cache cleaned in %s ms", totalTime));
+			if (killedMsg.length() > 0) {
+				msg.append("  Jobs killed:\n");
+				msg.append(killedMsg.toString());
+			}
 
 			log.info(msg.toString());
 		}
@@ -237,12 +247,12 @@ public class SimpleManagingCache<K, V> {
 			StringBuilder msg = new StringBuilder();
 			msg.append("Monitoring:\n");
 			msg.append("  Requests:\n");
-			msg.append(String.format("    Inserted entries:        %s\n", insertedCount));
-			msg.append(String.format("    Removed entries:         %s\n", removedCount));
-			msg.append(String.format("    Requested entries:       %s\n", requestedCount));
-			msg.append(String.format("    Actions summary:         %s\n", sumRequests));
+			msg.append(String.format("    Inserted entries:         %s\n", insertedCount));
+			msg.append(String.format("    Removed entries:          %s\n", removedCount));
+			msg.append(String.format("    Requested entries:        %s\n", requestedCount));
+			msg.append(String.format("    Actions summary:          %s\n", sumRequests));
 			msg.append("  Cache health:\n");
-			msg.append(String.format("    Actual cache size:       %s\n", cacheSize));
+			msg.append(String.format("    Actual cache size:        %s\n", cacheSize));
 			msg.append("   .=============================.\n");
 			msg.append("   | Age in minutes | Count      |\n");
 			msg.append("   .-----------------------------.\n");

@@ -172,8 +172,9 @@ public interface JobInstanceService {
 	/**
 	 * 
 	 * @param job
+	 * @return
 	 */
-	void persistJobInstance(JobInstanceJobJson job);
+	Long persistJobInstance(JobInstanceJobJson job);
 
 	/**
 	 * 

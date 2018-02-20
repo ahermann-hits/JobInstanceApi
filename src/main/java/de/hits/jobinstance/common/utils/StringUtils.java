@@ -1,65 +1,60 @@
 package de.hits.jobinstance.common.utils;
 
+/**
+ * A minimal version of my StringUtils, only with the methods I need in this
+ * project.
+ * 
+ * @author André Hermann
+ * @since 08.02.2018
+ * @version 1.0
+ */
 public class StringUtils {
 
 	public static boolean isEmpty(String s) {
+		boolean result = false;
+
 		if (s == null) {
-			return true;
+			result = true;
+		} else if (s.trim().isEmpty()) {
+			result = true;
+		} else if (s.equals("null")) {
+			result = true;
 		}
-		if (s.trim().isEmpty()) {
-			return true;
-		}
-		if (s.equals("null")) {
-			return true;
-		}
-		return false;
+
+		return result;
 	}
 
 	public static boolean getNullSaveBoolean(String value) {
-		if (value == null) {
-			return false;
+		boolean result = false;
+
+		if (value != null) {
+			value = value.toLowerCase();
+
+			if ("true".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("1".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("yes".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("y".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("sí".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("да".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("ja".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("j".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("oui".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("ok".equals(value)) {
+				result = Boolean.TRUE;
+			} else if ("x".equals(value)) {
+				result = Boolean.TRUE;
+			}
 		}
-		value = value.toLowerCase();
-		if ("true".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("false".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("1".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("0".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("yes".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("y".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("sí".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("да".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("no".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("нет".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("n".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("ja".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("j".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("nein".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("oui".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("non".equals(value)) {
-			return Boolean.FALSE;
-		} else if ("ok".equals(value)) {
-			return Boolean.TRUE;
-		} else if ("x".equals(value)) {
-			return Boolean.TRUE;
-		} else if (value != null) {
-			return Boolean.FALSE;
-		} else {
-			return false;
-		}
+
+		return result;
 	}
 }
