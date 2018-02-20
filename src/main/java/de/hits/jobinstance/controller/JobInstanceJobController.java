@@ -26,9 +26,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.hits.jobinstance.common.SimpleManagingCache;
 import de.hits.jobinstance.common.utils.NumberUtils;
 import de.hits.jobinstance.common.utils.RestPreconditions;
-import de.hits.jobinstance.common.utils.SimpleManagingCache;
 import de.hits.jobinstance.common.utils.StringUtils;
 import de.hits.jobinstance.data.JobInstanceJobJson;
 import de.hits.jobinstance.data.JobInstanceStatusJson;

@@ -1,4 +1,4 @@
-package de.hits.jobinstance.common.utils;
+package de.hits.jobinstance.common;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +31,7 @@ public class SimpleManagingCache<K, V> {
 	private boolean monitoringEnabled = false;
 
 	private long timeToLive;
+	private String timeToLiveMsg;
 
 	private ConcurrentHashMap<K, CacheObject> cacheMap;
 
@@ -63,6 +64,18 @@ public class SimpleManagingCache<K, V> {
 		this.cacheMap = new ConcurrentHashMap<>(initialCapacity);
 
 		if (timeToLive > 0 && managingTimerInterval > 0) {
+			long inMinutes = this.timeToLive / 60;
+			long inHours = inMinutes / 60;
+
+			long seconds = this.timeToLive % 60;
+			long minutes = inMinutes % 60;
+			long hours = inHours % 24;
+			long days = inHours / 24;
+
+			this.timeToLiveMsg = String.format(
+					"  Max lifetime:               %s days, %s hours, %s minutes, %s seconds", days, hours, minutes,
+					seconds);
+
 			Thread thread = new Thread(new Runnable() {
 				public void run() {
 					while (true) {
@@ -168,7 +181,7 @@ public class SimpleManagingCache<K, V> {
 		cacheMap.forEach(parallelismThreshold, (k, v) -> {
 			if (v.created < thresholdAge) {
 				if (loggingEnabled) {
-					killedMsg.append(String.format("    - %s\n", v.value.toString()));
+					killedMsg.append(String.format("\n    - %s", v.value.toString()));
 				}
 
 				deleteCounter.incrementAndGet();
@@ -183,12 +196,13 @@ public class SimpleManagingCache<K, V> {
 
 			StringBuilder msg = new StringBuilder();
 			msg.append("Cleansing:\n");
+			msg.append(this.timeToLiveMsg);
 			msg.append(String.format("  Cache size before cleaning: %s\n", sizeBeforCleansing));
 			msg.append(String.format("  Cleaned entries:            %s (sum: %s)\n", deleteCounter.get(), killed.get()));
 			msg.append(String.format("  Cache size after cleaning:  %s\n", cacheMap.size()));
 			msg.append(String.format("  Cache cleaned in %s ms", totalTime));
 			if (killedMsg.length() > 0) {
-				msg.append("  Jobs killed:\n");
+				msg.append("\n  Jobs killed:");
 				msg.append(killedMsg.toString());
 			}
 
