@@ -61,6 +61,7 @@ public class JobInstanceJobController {
 	private static final String CACHE_WORK_MONITORING_INTERVAL	= "manage.cache.work.monitoring.timeinterval";
 	private static final String CACHE_WRITE						= "manage.cache.write";
 	private static final String CACHE_WRITE_INTERVAL				= "manage.cache.write.timeinterval";
+	private static final String METHODE_SAVE_NONCACHED			= "manage.methode.job.save.acceptnoncached";
 
 	private final AtomicLong jobInstanceIdSequence = new AtomicLong();
 
@@ -200,24 +201,40 @@ public class JobInstanceJobController {
 			this.log.trace(this.getClass().getSimpleName() + "#save()");
 		}
 
+		String saveNonCachedStr = env.getProperty(METHODE_SAVE_NONCACHED);
+		Boolean saveNonCached = StringUtils.getNullSaveBoolean(saveNonCachedStr);
+
 		counterSaved.getAndIncrement();
 
 		JobInstanceStatusJson currentJob = resource.getCurrentJob();
 		long jobInstanceId = currentJob.getJobInstanceId();
-		// little check
-		if (jobInstanceId == id && this.workCache.containsKey(jobInstanceId)) {
-			if (currentJob.getJobEnded() == null) {
-				currentJob.setJobEnded(LocalDateTime.now());
-			}
+		if (currentJob.getJobEnded() == null) {
+			currentJob.setJobEnded(LocalDateTime.now());
+		}
 
+		if (saveNonCached) {
 			if (this.useWriteCache) {
 				this.writeCache.put(jobInstanceId, resource);
 			} else {
 				this.jobService.persistJobInstance(resource);
 			}
 
-			// Verarbeiteten Job aus dem Cache entfernen.
-			this.workCache.remove(jobInstanceId);
+			// Verarbeiteten Job aus dem Cache entfernen, falls vorhanden.
+			if (this.workCache.containsKey(jobInstanceId)) {
+				this.workCache.remove(jobInstanceId);
+			}
+		} else {
+			// little check
+			if (jobInstanceId == id && this.workCache.containsKey(jobInstanceId)) {
+				if (this.useWriteCache) {
+					this.writeCache.put(jobInstanceId, resource);
+				} else {
+					this.jobService.persistJobInstance(resource);
+				}
+
+				// Verarbeiteten Job aus dem Cache entfernen.
+				this.workCache.remove(jobInstanceId);
+			}
 		}
 
 		return resource;

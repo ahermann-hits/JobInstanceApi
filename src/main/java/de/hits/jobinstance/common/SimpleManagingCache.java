@@ -64,10 +64,10 @@ public class SimpleManagingCache<K, V> {
 		this.cacheMap = new ConcurrentHashMap<>(initialCapacity);
 
 		if (timeToLive > 0 && managingTimerInterval > 0) {
-			long inMinutes = this.timeToLive / 60;
+			long inMinutes = timeToLive / 60;
 			long inHours = inMinutes / 60;
 
-			long seconds = this.timeToLive % 60;
+			long seconds = timeToLive % 60;
 			long minutes = inMinutes % 60;
 			long hours = inHours % 24;
 			long days = inHours / 24;
@@ -196,7 +196,7 @@ public class SimpleManagingCache<K, V> {
 
 			StringBuilder msg = new StringBuilder();
 			msg.append("Cleansing:\n");
-			msg.append(this.timeToLiveMsg);
+			msg.append(this.timeToLiveMsg + "\n");
 			msg.append(String.format("  Cache size before cleaning: %s\n", sizeBeforCleansing));
 			msg.append(String.format("  Cleaned entries:            %s (sum: %s)\n", deleteCounter.get(), killed.get()));
 			msg.append(String.format("  Cache size after cleaning:  %s\n", cacheMap.size()));
