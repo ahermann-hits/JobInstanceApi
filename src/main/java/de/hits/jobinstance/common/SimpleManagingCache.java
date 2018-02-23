@@ -241,8 +241,9 @@ public class SimpleManagingCache<K, V> {
 
 		final long insertedCount = inserted.get();
 		final long removedCount = removed.get();
+		final long killedCount = killed.get();
 		final long requestedCount = requested.get();
-		final long sumRequests = insertedCount + removedCount + requestedCount;
+		final long sumRequests = insertedCount + removedCount + killedCount + requestedCount;
 		final int cacheSize = cacheMap.size();
 		final long threshold = System.currentTimeMillis();
 
@@ -263,6 +264,7 @@ public class SimpleManagingCache<K, V> {
 			msg.append("  Requests:\n");
 			msg.append(String.format("    Inserted entries:         %s\n", insertedCount));
 			msg.append(String.format("    Removed entries:          %s\n", removedCount));
+			msg.append(String.format("    Killed entries:           %s\n", killedCount));
 			msg.append(String.format("    Requested entries:        %s\n", requestedCount));
 			msg.append(String.format("    Actions summary:          %s\n", sumRequests));
 			msg.append("  Cache health:\n");

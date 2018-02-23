@@ -5,8 +5,6 @@ import java.sql.Timestamp;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 /**
@@ -77,15 +75,16 @@ public class JobInstanceStatus {
 
 	public JobInstanceStatus() {}
 
-	@PrePersist
-	public void prePersist() {
-		setJobStarted(new Timestamp(new java.util.Date().getTime()));
-	}
-
-	@PreUpdate
-	public void preUpdate() {
-		setJobEnded(new Timestamp(new java.util.Date().getTime()));
-	}
+	// Handled by the controller.
+//	@PrePersist
+//	public void prePersist() {
+//		setJobStarted(new Timestamp(new java.util.Date().getTime()));
+//	}
+//
+//	@PreUpdate
+//	public void preUpdate() {
+//		setJobEnded(new Timestamp(new java.util.Date().getTime()));
+//	}
 
 	/**
 	 * @return the jobInstanceId

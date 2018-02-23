@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -73,6 +76,7 @@ public class JobInstanceJobController {
 	private ConcurrentHashMap<Long, JobInstanceJobJson> writeCache;
 
 	private boolean useWriteCache = false;
+	private boolean saveNonCached = false;
 	private long writeTimeInterval = -1l;
 
 	@Autowired
@@ -98,6 +102,9 @@ public class JobInstanceJobController {
 		String workCacheMonitoringIntervalStr = env.getProperty(CACHE_WORK_MONITORING_INTERVAL);
 		String writeCacheStr = env.getProperty(CACHE_WRITE);
 		String writeCacheIntervalStr = env.getProperty(CACHE_WRITE_INTERVAL);
+		String saveNonCachedStr = env.getProperty(METHODE_SAVE_NONCACHED);
+
+		this.saveNonCached = StringUtils.getNullSaveBoolean(saveNonCachedStr);
 
 		this.catalogCache = new HashMap<>();
 
@@ -113,8 +120,9 @@ public class JobInstanceJobController {
 		}
 
 		Boolean useWorkCacheMonitoring = StringUtils.getNullSaveBoolean(workCacheMonitoringStr);
+		Long workCacheMonitoringInterval = (long) managingTimerInterval;
 		if (useWorkCacheMonitoring != null && useWorkCacheMonitoring) {
-			Long workCacheMonitoringInterval = NumberUtils.getLong(workCacheMonitoringIntervalStr);
+			workCacheMonitoringInterval = NumberUtils.getLong(workCacheMonitoringIntervalStr);
 			if (workCacheMonitoringInterval != null) {
 				this.workCache.setMonitoring(true, workCacheMonitoringInterval);
 			} else {
@@ -134,24 +142,61 @@ public class JobInstanceJobController {
 
 		this.jobInstanceIdSequence.set(jobService.getMaxJobId());
 
-		this.log.info("Maximum JobInstance-ID in the database: " + this.jobInstanceIdSequence.get());
-		this.log.info("Use write cache: " + this.useWriteCache);
+		this.log.info(String.format("Work cache: Maximum lifetime of an object in seconds: %s (configured: '%s').",
+				timeToLive, workCacheLifetime));
+		this.log.info(String.format("Work cache: Cleansing interval in seconds: %s (configured: '%s').",
+				managingTimerInterval, workCacheInterval));
+		this.log.info(String.format("Work cache: Save non-cached enabled: %s (configured: '%s').",
+				this.saveNonCached, saveNonCachedStr));
+		this.log.info(String.format("Work cache: Logging is enabled: %s (configured: '%s').",
+				useWorkCacheLogging, workCacheLoggingStr));
+		this.log.info(String.format("Work cache: Monitoring is enabled: %s (configured: '%s').",
+				useWorkCacheMonitoring, workCacheMonitoringStr));
+		this.log.info(String.format("Work cache: Monitoring every %s seconds (configured: '%s').",
+				workCacheMonitoringInterval, workCacheMonitoringIntervalStr));
+
+		this.log.info("Write cache: Write cache is enabled: " + this.useWriteCache);
 		if (this.useWriteCache) {
-			this.log.info(String.format("Persist write cache every %s seconds.", this.writeTimeInterval));
+			this.log.info(String.format("Write cache: Persist write cache interval in seconds: %s (configured: '%s').",
+					this.writeTimeInterval, writeCacheIntervalStr));
 		}
+		this.log.info("Maximum JobInstance-ID in the database: " + this.jobInstanceIdSequence.get());
 
 		this.catalogService.listAllCatalogs()
 				.forEach(catalog -> this.catalogCache.put(catalog.getCatalogId(), catalog));
 	}
 
+	@PreDestroy
+	public void cleanUp() {
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(this.getClass().getSimpleName() + "#cleanUp()");
+		}
+
+		this.log.info("Shutdown requested, cleaning up before shutdown.");
+
+		persistWriteCache();
+
+		this.workCache = null;
+	}
+
+	@RequestMapping(value = "/cache", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public List<JobInstanceJobJson> showCache() throws IOException {
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(this.getClass().getSimpleName() + "#showCache()");
+		}
+
+		return this.workCache.getEntries().entrySet().stream().map(e -> e.getValue()).collect(Collectors.toList());
+	}
+
 	@RequestMapping(value = "/list/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
 	@ResponseBody
 	public JobInstanceJobJson findOne(@PathVariable("id") long id) throws IOException {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#findOne()");
 		}
-
-		counterCreated.getAndIncrement();
 
 		JobInstanceJobJson json = null;
 
@@ -176,6 +221,8 @@ public class JobInstanceJobController {
 			this.log.trace(this.getClass().getSimpleName() + "#create()");
 		}
 
+		this.counterCreated.incrementAndGet();
+
 		JobInstanceJobJson response = null;
 		long jobInstanceId = this.jobInstanceIdSequence.incrementAndGet();
 
@@ -185,6 +232,10 @@ public class JobInstanceJobController {
 				&& !StringUtils.isEmpty(resource.getHostUser()) && !NumberUtils.isEmpty(resource.getHostPid());
 
 		if (isCommonValid && isTechnicalValid) {
+			if (resource.getJobStarted() == null) {
+				resource.setJobStarted(LocalDateTime.now());
+			}
+
 			response = this.jobService.createJobInstance(jobInstanceId, resource);
 
 			this.workCache.put(jobInstanceId, response);
@@ -201,10 +252,7 @@ public class JobInstanceJobController {
 			this.log.trace(this.getClass().getSimpleName() + "#save()");
 		}
 
-		String saveNonCachedStr = env.getProperty(METHODE_SAVE_NONCACHED);
-		Boolean saveNonCached = StringUtils.getNullSaveBoolean(saveNonCachedStr);
-
-		counterSaved.getAndIncrement();
+		this.counterSaved.getAndIncrement();
 
 		JobInstanceStatusJson currentJob = resource.getCurrentJob();
 		long jobInstanceId = currentJob.getJobInstanceId();
@@ -212,7 +260,7 @@ public class JobInstanceJobController {
 			currentJob.setJobEnded(LocalDateTime.now());
 		}
 
-		if (saveNonCached) {
+		if (this.saveNonCached) {
 			if (this.useWriteCache) {
 				this.writeCache.put(jobInstanceId, resource);
 			} else {
@@ -238,6 +286,48 @@ public class JobInstanceJobController {
 		}
 
 		return resource;
+	}
+
+	@RequestMapping(value = "/cancel/{id}", method = RequestMethod.GET)
+	@ResponseStatus(HttpStatus.OK)
+	@ResponseBody
+	public ResponseEntity<String> cancel(@PathVariable("id") long id) {
+		if (this.log.isTraceEnabled()) {
+			this.log.trace(this.getClass().getSimpleName() + "#cancel()");
+		}
+
+		boolean wasInWorkCache = false;
+		boolean wasInWriteCache = false;
+
+		if (this.workCache.containsKey(id)) {
+			wasInWorkCache = true;
+			this.workCache.remove(id);
+		}
+		if (this.useWriteCache && this.writeCache.containsKey(id)) {
+			wasInWriteCache = true;
+			this.writeCache.remove(id);
+		}
+
+		StringBuilder responseMsg = new StringBuilder();
+		if (!wasInWorkCache && !wasInWriteCache) {
+			responseMsg.append(String.format("The job with the id %s was not cached.", id));
+		} else {
+			if (wasInWorkCache && !wasInWriteCache) {
+				responseMsg.append(String.format("The job with the id %s was removed from the work cache.", id));
+			} else if (!wasInWorkCache && wasInWriteCache) {
+				responseMsg.append(String.format("The job with the id %s was removed from the write cache.", id));
+			} else {
+				responseMsg
+						.append(String.format("The job with the id %s was removed from the work and write cache.", id));
+			}
+		}
+
+		String msg = responseMsg.toString();
+		ResponseEntity<String> response = new ResponseEntity<String>(msg, HttpStatus.OK);
+
+		log.info(msg + " (Removing by an external call.)");
+
+		return response;
 	}
 
 	@RequestMapping(value = "/previous", method = RequestMethod.POST)
