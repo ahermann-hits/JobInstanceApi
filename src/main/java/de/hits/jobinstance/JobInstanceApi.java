@@ -21,9 +21,9 @@ import org.springframework.context.annotation.PropertySources;
  */
 @Configuration
 @PropertySources({
-	@PropertySource("classpath:application.properties"),
+	@PropertySource("classpath:application-${spring.profiles.active}.properties"),
 	// extend classpath application configuration by external resource file
-	@PropertySource(value = "file:./application.properties", ignoreResourceNotFound = true)
+	@PropertySource(value = "file:./application-${spring.profiles.active}.properties", ignoreResourceNotFound = true)
 })
 @SpringBootApplication
 @EnableAutoConfiguration

@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 @Configuration
 @EnableWebMvc
-public class WebConfiguration extends WebMvcConfigurerAdapter {
+public class WebMvcConfiguration extends WebMvcConfigurerAdapter {
 
 	@Bean
 	public Jackson2ObjectMapperBuilder jsonObjectMapper() {

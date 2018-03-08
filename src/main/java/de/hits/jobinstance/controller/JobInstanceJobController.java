@@ -49,9 +49,9 @@ import de.hits.jobinstance.service.JobInstanceService;
 @RequestMapping("/job/api/job")
 @PropertySources({
 	// default configuration file
-	@PropertySource("classpath:config/manage.properties"),
+	@PropertySource("classpath:config/manage-${spring.profiles.active}.properties"),
 	// replacing classpath configuration file by external resource file if exists
-	@PropertySource(value = "file:./manage.properties", ignoreResourceNotFound = true)
+	@PropertySource(value = "file:./manage-${spring.profiles.active}.properties", ignoreResourceNotFound = true)
 })
 public class JobInstanceJobController {
 
