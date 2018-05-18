@@ -232,7 +232,7 @@ public class SimpleManagingCache<K, V> {
 		thread.start();
 	}
 
-	private void monitor() {
+	public void monitor() {
 		if (loggingEnabled && log.isTraceEnabled()) {
 			log.trace(getClass().getSimpleName() + "#monitor()");
 		}

@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.hits.jobinstance.common.data.JobInstanceJob;
+import de.hits.jobinstance.common.data.JobInstanceStatus;
 import de.hits.jobinstance.common.utils.RestPreconditions;
-import de.hits.jobinstance.data.JobInstanceJobJson;
-import de.hits.jobinstance.data.JobInstanceStatusJson;
 import de.hits.jobinstance.service.JobInstanceService;
 
 /**
@@ -40,27 +40,27 @@ public class JobInstanceStatusController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<JobInstanceJobJson> findAll() {
+	public List<JobInstanceJob> findAll() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#findAll()");
 		}
 
 		return this.jobService.listAllJobs().stream().map(job -> this.jobService.convertJobToJson(job))
-				.map(json -> new JobInstanceJobJson(json)).collect(Collectors.toList());
+				.map(json -> new JobInstanceJob(json)).collect(Collectors.toList());
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public JobInstanceJobJson findOne(@PathVariable("id") final long id,
+	public JobInstanceJob findOne(@PathVariable("id") final long id,
 			@RequestParam(value = "counter", required = false) final Boolean counter,
 			@RequestParam(value = "previous", required = false) final Boolean previousJobs) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#findOne()");
 		}
 
-		JobInstanceStatusJson job = this.jobService
+		JobInstanceStatus job = this.jobService
 				.convertJobToJson(RestPreconditions.checkFound(this.jobService.getJobById(id)));
-		JobInstanceJobJson response = new JobInstanceJobJson(job);
+		JobInstanceJob response = new JobInstanceJob(job);
 
 		if (counter != null && counter) {
 			response.setCounters(this.jobService.listAllCounterForJob(id).stream()

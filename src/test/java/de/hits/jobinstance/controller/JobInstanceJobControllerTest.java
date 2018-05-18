@@ -17,11 +17,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import de.hits.jobinstance.JobInstanceApiTest;
+import de.hits.jobinstance.common.data.JobInstanceCounter;
+import de.hits.jobinstance.common.data.JobInstanceJob;
+import de.hits.jobinstance.common.data.JobInstanceStatus;
 import de.hits.jobinstance.common.utils.test.IntegrationTestUtil;
 import de.hits.jobinstance.data.CatalogJson;
-import de.hits.jobinstance.data.JobInstanceCounterJson;
-import de.hits.jobinstance.data.JobInstanceJobJson;
-import de.hits.jobinstance.data.JobInstanceStatusJson;
 
 /**
  * 
@@ -42,7 +42,7 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 		int hostPid = 1;
 		String hostUser = "mockUser";
 
-		JobInstanceStatusJson mockResource = new JobInstanceStatusJson();
+		JobInstanceStatus mockResource = new JobInstanceStatus();
 		mockResource.setProjectName(projectName);
 		mockResource.setJobName(jobName);
 		mockResource.setHostName(hostName);
@@ -76,7 +76,7 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 		int hostPid = 12093;
 		String hostUser = "mockUser";
 
-		JobInstanceStatusJson mockResource = new JobInstanceStatusJson();
+		JobInstanceStatus mockResource = new JobInstanceStatus();
 		mockResource.setProjectName(projectName);
 		mockResource.setJobName(jobName);
 		mockResource.setHostName(hostName);
@@ -101,7 +101,7 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 				.andExpect(jsonPath("$.PreviousJobs").doesNotExist())
 				.andReturn();
 
-		JobInstanceJobJson responseCreateJson = IntegrationTestUtil.convertResponseToJobInstanceJson(responseCreate);
+		JobInstanceJob responseCreateJson = IntegrationTestUtil.convertResponseToJobInstanceJson(responseCreate);
 		long jobInstanceId = responseCreateJson.getCurrentJob().getJobInstanceId();
 
 		this.mockMvc.perform(get("/job/api/job/list/{id}", jobInstanceId))
@@ -128,7 +128,7 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 		int hostPid = 14174;
 		String hostUser = "mockUser";
 
-		JobInstanceStatusJson mockResource = new JobInstanceStatusJson();
+		JobInstanceStatus mockResource = new JobInstanceStatus();
 		mockResource.setProjectName(projectName);
 		mockResource.setJobName(jobName);
 		mockResource.setHostName(hostName);
@@ -153,7 +153,7 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 				.andExpect(jsonPath("$.PreviousJobs").doesNotExist())
 				.andReturn();
 
-		JobInstanceJobJson responseCreateJson = IntegrationTestUtil.convertResponseToJobInstanceJson(responseCreate);
+		JobInstanceJob responseCreateJson = IntegrationTestUtil.convertResponseToJobInstanceJson(responseCreate);
 		long jobInstanceId = responseCreateJson.getCurrentJob().getJobInstanceId();
 
 		this.mockMvc.perform(get("/job/api/job/list/{id}", jobInstanceId))
@@ -162,12 +162,12 @@ public class JobInstanceJobControllerTest extends JobInstanceApiTest {
 				.andDo(print());
 
 		CatalogJson catalogCounterFetch = this.catalogController.findByName("counter_fetch");
-		JobInstanceCounterJson counterFetch = new JobInstanceCounterJson(null, jobInstanceId,
+		JobInstanceCounter counterFetch = new JobInstanceCounter(null, jobInstanceId,
 				catalogCounterFetch.getCatalogId(), "mockCounter", 10);
 		responseCreateJson.addCounter(counterFetch);
 
 		CatalogJson catalogCounterInsert = this.catalogController.findByName("counter_insert");
-		JobInstanceCounterJson counterInsert = new JobInstanceCounterJson(null, jobInstanceId,
+		JobInstanceCounter counterInsert = new JobInstanceCounter(null, jobInstanceId,
 				catalogCounterInsert.getCatalogId(), "mockCounter", 10);
 		responseCreateJson.addCounter(counterInsert);
 

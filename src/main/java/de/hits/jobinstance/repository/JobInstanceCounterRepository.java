@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import de.hits.jobinstance.domain.JobInstanceCounter;
+import de.hits.jobinstance.domain.JobInstanceCounterEntity;
 
 /**
  * 
@@ -12,18 +12,18 @@ import de.hits.jobinstance.domain.JobInstanceCounter;
  * @since 08.02.2018
  * @version 1.0
  */
-public interface JobInstanceCounterRepository extends CrudRepository<JobInstanceCounter, Long> {
+public interface JobInstanceCounterRepository extends CrudRepository<JobInstanceCounterEntity, Long> {
 
 	/**
 	 * 
 	 * @return
 	 */
-	List<JobInstanceCounter> findAllByOrderByJobInstanceIdAscJobCounterIdAsc();
+	List<JobInstanceCounterEntity> findAllByOrderByJobInstanceIdAscJobCounterIdAsc();
 
 	/**
 	 * 
 	 * @param jiid
 	 * @return
 	 */
-	List<JobInstanceCounter> findByJobInstanceId(long jiid);
+	List<JobInstanceCounterEntity> findByJobInstanceId(long jiid);
 }

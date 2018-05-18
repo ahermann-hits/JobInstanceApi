@@ -3,12 +3,12 @@ package de.hits.jobinstance.service;
 import java.util.List;
 import java.util.Map;
 
+import de.hits.jobinstance.common.data.JobInstanceCounter;
+import de.hits.jobinstance.common.data.JobInstanceJob;
+import de.hits.jobinstance.common.data.JobInstanceStatus;
 import de.hits.jobinstance.data.CatalogJson;
-import de.hits.jobinstance.data.JobInstanceCounterJson;
-import de.hits.jobinstance.data.JobInstanceJobJson;
-import de.hits.jobinstance.data.JobInstanceStatusJson;
-import de.hits.jobinstance.domain.JobInstanceCounter;
-import de.hits.jobinstance.domain.JobInstanceStatus;
+import de.hits.jobinstance.domain.JobInstanceCounterEntity;
+import de.hits.jobinstance.domain.JobInstanceStatusEntity;
 
 /**
  * 
@@ -22,14 +22,14 @@ public interface JobInstanceService {
 	 * 
 	 * @return
 	 */
-	List<JobInstanceStatus> listAllJobs();
+	List<JobInstanceStatusEntity> listAllJobs();
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	List<JobInstanceStatus> listAllJobsForProcessId(long id);
+	List<JobInstanceStatusEntity> listAllJobsForProcessId(long id);
 
 	/**
 	 * 
@@ -42,7 +42,7 @@ public interface JobInstanceService {
 	 * @param id
 	 * @return
 	 */
-	JobInstanceStatus getJobById(long id);
+	JobInstanceStatusEntity getJobById(long id);
 
 	/**
 	 * 
@@ -55,7 +55,7 @@ public interface JobInstanceService {
 	 * @param forWorkItem
 	 * @return
 	 */
-	JobInstanceStatus retrievePreviousJobInstance(long jobInstanceId, String jobName, String workItem,
+	JobInstanceStatusEntity retrievePreviousJobInstance(long jobInstanceId, String jobName, String workItem,
 			Boolean successful, Boolean withInput, Boolean withOutput, Boolean forWorkItem);
 
 	/**
@@ -65,48 +65,48 @@ public interface JobInstanceService {
 	 *            Der Job der in der Datenbank gespeichert werden soll.
 	 * @return Die Instanz des gespeicherten Datensatzes aus der Datenbank.
 	 */
-	JobInstanceStatus saveJob(JobInstanceStatus job);
+	JobInstanceStatusEntity saveJob(JobInstanceStatusEntity job);
 
 	/**
 	 * 
 	 * @param jobs
 	 * @return
 	 */
-	List<JobInstanceStatus> saveAllJobs(List<JobInstanceStatus> jobs);
+	List<JobInstanceStatusEntity> saveAllJobs(List<JobInstanceStatusEntity> jobs);
 
 	/**
 	 * 
 	 * @param job
 	 * @return
 	 */
-	JobInstanceStatusJson convertJobToJson(JobInstanceStatus job);
+	JobInstanceStatus convertJobToJson(JobInstanceStatusEntity job);
 
 	/**
 	 * 
 	 * @param json
 	 * @return
 	 */
-	JobInstanceStatus convertJsonToJob(JobInstanceStatusJson json);
+	JobInstanceStatusEntity convertJsonToJob(JobInstanceStatus json);
 
 	/**
 	 * 
 	 * @return
 	 */
-	List<JobInstanceCounter> listAllCounter();
-
-	/**
-	 * 
-	 * @param id
-	 * @return
-	 */
-	List<JobInstanceCounter> listAllCounterForJob(long id);
+	List<JobInstanceCounterEntity> listAllCounter();
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	JobInstanceCounter getCounterById(long id);
+	List<JobInstanceCounterEntity> listAllCounterForJob(long id);
+
+	/**
+	 * 
+	 * @param id
+	 * @return
+	 */
+	JobInstanceCounterEntity getCounterById(long id);
 
 	/**
 	 * Speichert den übergebenen {@link JobInstanceCounter Zähler} in der Datenbank.
@@ -115,7 +115,7 @@ public interface JobInstanceService {
 	 *            Der Zähler der in der Datenbank gespeichert werden soll.
 	 * @return Die Instanz des gespeicherten Datensatzes aus der Datenbank.
 	 */
-	JobInstanceCounter saveCounter(JobInstanceCounter counter);
+	JobInstanceCounterEntity saveCounter(JobInstanceCounterEntity counter);
 
 	/**
 	 * Speichert die übergebenen {@link JobInstanceCounter Zähler} in der Datenbank.
@@ -124,21 +124,21 @@ public interface JobInstanceService {
 	 *            Die Zähler die in der Datenbank gespeichert werden soll.
 	 * @return Die Instanzen der gespeicherten Datensätze aus der Datenbank.
 	 */
-	List<JobInstanceCounter> saveAllCounters(List<JobInstanceCounter> counters);
+	List<JobInstanceCounterEntity> saveAllCounters(List<JobInstanceCounterEntity> counters);
 
 	/**
 	 * 
 	 * @param counter
 	 * @return
 	 */
-	JobInstanceCounterJson convertCounterToJson(JobInstanceCounter counter);
+	JobInstanceCounter convertCounterToJson(JobInstanceCounterEntity counter);
 
 	/**
 	 * 
 	 * @param json
 	 * @return
 	 */
-	JobInstanceCounter convertJsonToCounter(JobInstanceCounterJson json);
+	JobInstanceCounterEntity convertJsonToCounter(JobInstanceCounter json);
 
 	/**
 	 * 
@@ -146,7 +146,7 @@ public interface JobInstanceService {
 	 * @param resource
 	 * @return
 	 */
-	JobInstanceJobJson createJobInstance(long jobInstanceId, JobInstanceStatusJson resource);
+	JobInstanceJob createJobInstance(long jobInstanceId, JobInstanceStatus resource);
 
 	/**
 	 * 
@@ -156,7 +156,7 @@ public interface JobInstanceService {
 	 * @param withOutput
 	 * @param forWorkItem
 	 */
-	void retrievePreviousInstanceData(JobInstanceJobJson job, Boolean successful, Boolean withInput, Boolean withOutput,
+	void retrievePreviousInstanceData(JobInstanceJob job, Boolean successful, Boolean withInput, Boolean withOutput,
 			Boolean forWorkItem);
 
 	/**
@@ -167,21 +167,21 @@ public interface JobInstanceService {
 	 * @param counterValue
 	 * @return
 	 */
-	void createCounter(JobInstanceJobJson job, String counterName, CatalogJson counterType, long counterValue);
+	void createCounter(JobInstanceJob job, String counterName, CatalogJson counterType, long counterValue);
 
 	/**
 	 * 
 	 * @param job
 	 * @return
 	 */
-	Long persistJobInstance(JobInstanceJobJson job);
+	Long persistJobInstance(JobInstanceJob job);
 
 	/**
 	 * 
 	 * @param jobs
 	 * @return
 	 */
-	List<Long> persistJobInstanceAll(Map<Long, JobInstanceJobJson> jobs);
+	List<Long> persistJobInstanceAll(Map<Long, JobInstanceJob> jobs);
 
 	/**
 	 * 

@@ -15,8 +15,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import de.hits.jobinstance.data.JobInstanceCounterJson;
-import de.hits.jobinstance.data.JobInstanceJobJson;
+import de.hits.jobinstance.common.data.JobInstanceCounter;
+import de.hits.jobinstance.common.data.JobInstanceJob;
 
 /**
  * 
@@ -35,42 +35,42 @@ public class IntegrationTestUtil {
 		return mapper.writeValueAsBytes(mockResource);
 	}
 
-	public static JobInstanceJobJson convertResponseToJobInstanceJson(MvcResult response) throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException {
+	public static JobInstanceJob convertResponseToJobInstanceJson(MvcResult response) throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.build();
 
-		return mapper.readValue(response.getResponse().getContentAsString(), JobInstanceJobJson.class);
+		return mapper.readValue(response.getResponse().getContentAsString(), JobInstanceJob.class);
 	}
 
-	public static List<JobInstanceJobJson> convertResponseToJobInstanceJsonList(MvcResult response)
+	public static List<JobInstanceJob> convertResponseToJobInstanceJsonList(MvcResult response)
 			throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.build();
 
-		return Arrays.asList(mapper.readValue(response.getResponse().getContentAsString(), JobInstanceJobJson[].class));
+		return Arrays.asList(mapper.readValue(response.getResponse().getContentAsString(), JobInstanceJob[].class));
 	}
 
-	public static JobInstanceCounterJson convertResponseToJobCounterJson(MvcResult response)
+	public static JobInstanceCounter convertResponseToJobCounterJson(MvcResult response)
 			throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.build();
 
-		return mapper.readValue(response.getResponse().getContentAsString(), JobInstanceCounterJson.class);
+		return mapper.readValue(response.getResponse().getContentAsString(), JobInstanceCounter.class);
 	}
 
-	public static List<JobInstanceCounterJson> convertResponseToJobCounterJsonList(MvcResult response)
+	public static List<JobInstanceCounter> convertResponseToJobCounterJsonList(MvcResult response)
 			throws JsonParseException, JsonMappingException, UnsupportedEncodingException, IOException {
 		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json()
 				.serializationInclusion(JsonInclude.Include.NON_NULL)
 				.featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 				.build();
 
-		return Arrays.asList(mapper.readValue(response.getResponse().getContentAsString(), JobInstanceCounterJson[].class));
+		return Arrays.asList(mapper.readValue(response.getResponse().getContentAsString(), JobInstanceCounter[].class));
 	}
 }

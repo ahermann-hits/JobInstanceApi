@@ -16,7 +16,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "job_instance_counter", schema = "manage")
-public class JobInstanceCounter {
+public class JobInstanceCounterEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "JOB_COUNTER_ID_SEQ")
@@ -34,7 +34,7 @@ public class JobInstanceCounter {
 	@Column(name = "COUNTER_VALUE", nullable = false, insertable = true, updatable = false)
 	private long counterValue;
 
-	public JobInstanceCounter() {}
+	public JobInstanceCounterEntity() {}
 
 	/**
 	 * @return the jobCounterId

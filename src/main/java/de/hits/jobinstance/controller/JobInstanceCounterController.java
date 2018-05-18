@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import de.hits.jobinstance.common.data.JobInstanceCounter;
 import de.hits.jobinstance.common.utils.RestPreconditions;
-import de.hits.jobinstance.data.JobInstanceCounterJson;
 import de.hits.jobinstance.service.JobInstanceService;
 
 /**
@@ -30,7 +30,7 @@ public class JobInstanceCounterController {
 
 	@RequestMapping(method = RequestMethod.GET)
 	@ResponseBody
-	public List<JobInstanceCounterJson> findAll(@RequestParam(value = "job", required = false) final Long jobId) {
+	public List<JobInstanceCounter> findAll(@RequestParam(value = "job", required = false) final Long jobId) {
 		if (jobId != null) {
 			return jobService.listAllCounterForJob(jobId).stream()
 					.map(counter -> jobService.convertCounterToJson(counter)).collect(Collectors.toList());
@@ -42,7 +42,7 @@ public class JobInstanceCounterController {
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	@ResponseBody
-	public JobInstanceCounterJson findOne(@PathVariable("id") long id) {
+	public JobInstanceCounter findOne(@PathVariable("id") long id) {
 		return jobService.convertCounterToJson(RestPreconditions.checkFound(jobService.getCounterById(id)));
 	}
 }

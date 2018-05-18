@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import de.hits.jobinstance.domain.Catalog;
+import de.hits.jobinstance.domain.CatalogEntity;
 
 /**
  * 
@@ -12,28 +12,28 @@ import de.hits.jobinstance.domain.Catalog;
  * @since 08.02.2018
  * @version 1.0
  */
-public interface CatalogRepository extends CrudRepository<Catalog, Long> {
+public interface CatalogRepository extends CrudRepository<CatalogEntity, Long> {
 
 	/**
 	 * 
 	 * @param catalogId
 	 * @return
 	 */
-	Catalog findByCatalogId(int catalogId);
+	CatalogEntity findByCatalogId(int catalogId);
 
 	/**
 	 * 
 	 * @param sysname
 	 * @return
 	 */
-	Catalog findBySysname(String sysname);
+	CatalogEntity findBySysname(String sysname);
 
 	/**
 	 * 
 	 * @param catalogTypeId
 	 * @return
 	 */
-	List<Catalog> findByCatalogTypeIdOrderBySortorderAsc(long catalogTypeId);
+	List<CatalogEntity> findByCatalogTypeIdOrderBySortorderAsc(long catalogTypeId);
 
 	/**
 	 * 
@@ -41,5 +41,5 @@ public interface CatalogRepository extends CrudRepository<Catalog, Long> {
 	 * @param sysname
 	 * @return
 	 */
-	Catalog findByCatalogTypeIdAndSysname(long catalogTypeId, String sysname);
+	CatalogEntity findByCatalogTypeIdAndSysname(long catalogTypeId, String sysname);
 }

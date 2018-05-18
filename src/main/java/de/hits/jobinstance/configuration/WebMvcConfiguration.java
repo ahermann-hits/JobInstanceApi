@@ -15,6 +15,10 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
+ * Web configuration class for this microservice.<br>
+ * <br>
+ * Changes the base path of all functional request mappings and configures the
+ * Jackson ObjectMapper to handle Java8 date data types.
  * 
  * @author André Hermann
  * @since 09.02.2018

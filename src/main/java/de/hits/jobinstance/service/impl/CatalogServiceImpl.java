@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import de.hits.jobinstance.data.CatalogJson;
-import de.hits.jobinstance.domain.Catalog;
+import de.hits.jobinstance.domain.CatalogEntity;
 import de.hits.jobinstance.repository.CatalogRepository;
 import de.hits.jobinstance.service.CatalogService;
 
@@ -37,18 +37,18 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public List<Catalog> listAllCatalogs() {
+	public List<CatalogEntity> listAllCatalogs() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listAllCatalogs()");
 		}
 
-		List<Catalog> catalogs = new ArrayList<>();
+		List<CatalogEntity> catalogs = new ArrayList<>();
 		CollectionUtils.addAll(catalogs, this.catalogRepo.findAll().iterator());
 		return catalogs;
 	}
 
 	@Override
-	public Catalog getCatalogById(int id) {
+	public CatalogEntity getCatalogById(int id) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#getCatalogById()");
 		}
@@ -57,7 +57,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public Catalog getCatalogBySysname(String sysname) {
+	public CatalogEntity getCatalogBySysname(String sysname) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#getCatalogBySysname()");
 		}
@@ -66,7 +66,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public List<Catalog> listByCatalogType(int catalogTypeId) {
+	public List<CatalogEntity> listByCatalogType(int catalogTypeId) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listByCatalogType()");
 		}
@@ -75,7 +75,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public Catalog getCatalogByTypeAndSysname(int catalogTypeId, String sysname) {
+	public CatalogEntity getCatalogByTypeAndSysname(int catalogTypeId, String sysname) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#getCatalogByTypeAndSysname()");
 		}
@@ -84,7 +84,7 @@ public class CatalogServiceImpl implements CatalogService {
 	}
 
 	@Override
-	public CatalogJson convertCatalogToJson(Catalog catalog) {
+	public CatalogJson convertCatalogToJson(CatalogEntity catalog) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#convertCatalogToJson()");
 		}

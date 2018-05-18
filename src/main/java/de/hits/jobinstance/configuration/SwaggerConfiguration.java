@@ -26,7 +26,7 @@ public class SwaggerConfiguration {
 
 	@Bean
 	public Docket api() {
-		// URL: 		http://localhost:8070/v2/api-docs
+		// URL: 	http://localhost:8070/v2/api-docs
 		//			http://localhost:8070/swagger-ui.html
 		// Links:	https://springframework.guru/spring-boot-restful-api-documentation-with-swagger-2/
 		//			https://www.concretepage.com/spring-4/spring-rest-swagger-2-integration-with-annotation-xml-example
@@ -43,7 +43,7 @@ public class SwaggerConfiguration {
 	private ApiInfo metaData() {
 		String title = "JobInstance REST API";
 		String description = "";
-		String version = "0.0.1";
+		String version = "0.0.2";
 		String termsOfServiceUrl = "";
 		Contact contact = new Contact("André Hermann", description, "andre_hermann@t-online.de");
 		String license = "Apache License Version 2.0";

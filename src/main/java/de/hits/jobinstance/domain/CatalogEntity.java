@@ -17,7 +17,7 @@ import javax.persistence.UniqueConstraint;
  */
 @Entity
 @Table(name = "catalog", schema = "manage", uniqueConstraints = { @UniqueConstraint(columnNames = { "SYSNAME" }) })
-public class Catalog {
+public class CatalogEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "CATALOG_SEQ")
@@ -39,7 +39,7 @@ public class Catalog {
 	@Column(name = "CATALOG_TYPE_ID", unique = false, nullable = false, updatable = true)
 	private int catalogTypeId;
 
-	private Catalog() {}
+	private CatalogEntity() {}
 
 	/**
 	 * @return the catalogId
@@ -149,8 +149,8 @@ public class Catalog {
 	@Override
 	public boolean equals(final Object catalog) {
 		boolean equals = super.equals(catalog);
-		if (!equals && catalog instanceof Catalog) {
-			final Catalog toCompare = (Catalog) catalog;
+		if (!equals && catalog instanceof CatalogEntity) {
+			final CatalogEntity toCompare = (CatalogEntity) catalog;
 
 			final String toCompareSysname = toCompare.getSysname();
 			final String toCompareName = toCompare.getName();

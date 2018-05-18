@@ -3,7 +3,6 @@ package de.hits.jobinstance.service.impl;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.math.BigInteger;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,13 +24,13 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
+import de.hits.jobinstance.common.data.JobInstanceCounter;
+import de.hits.jobinstance.common.data.JobInstanceJob;
+import de.hits.jobinstance.common.data.JobInstanceStatus;
 import de.hits.jobinstance.data.CatalogJson;
-import de.hits.jobinstance.data.JobInstanceCounterJson;
-import de.hits.jobinstance.data.JobInstanceJobJson;
-import de.hits.jobinstance.data.JobInstanceStatusJson;
-import de.hits.jobinstance.domain.Catalog;
-import de.hits.jobinstance.domain.JobInstanceCounter;
-import de.hits.jobinstance.domain.JobInstanceStatus;
+import de.hits.jobinstance.domain.CatalogEntity;
+import de.hits.jobinstance.domain.JobInstanceCounterEntity;
+import de.hits.jobinstance.domain.JobInstanceStatusEntity;
 import de.hits.jobinstance.repository.JobInstanceCounterRepository;
 import de.hits.jobinstance.repository.JobInstanceStatusRepository;
 import de.hits.jobinstance.service.JobInstanceService;
@@ -47,7 +46,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 
 	private final Logger log = LoggerFactory.getLogger(getClass());
 
-	private Map<Integer, Catalog> counterCatalogs;
+	private Map<Integer, CatalogEntity> counterCatalogs;
 
 	private JobInstanceStatusRepository jobInstanceRepository;
 	private JobInstanceCounterRepository jobCounterRepository;
@@ -93,7 +92,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 		List<String> sysnames = Arrays.asList(CounterType.values()).stream()
 				.map(counterType -> counterType.getSysname()).collect(Collectors.toList());
 
-		List<Catalog> catalogs = sysnames.stream()
+		List<CatalogEntity> catalogs = sysnames.stream()
 				.map(sysname -> CompletableFuture.supplyAsync(() -> this.catalogService.getCatalogBySysname(sysname)))
 				.map(CompletableFuture::join).collect(Collectors.toList());
 
@@ -109,7 +108,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceStatus> listAllJobs() {
+	public List<JobInstanceStatusEntity> listAllJobs() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listAllJobs()");
 		}
@@ -118,7 +117,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceStatus> listAllJobsForProcessId(long id) {
+	public List<JobInstanceStatusEntity> listAllJobsForProcessId(long id) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listAllForProcessId()");
 		}
@@ -139,7 +138,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceStatus getJobById(long id) {
+	public JobInstanceStatusEntity getJobById(long id) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#getJobById()");
 		}
@@ -148,7 +147,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceStatus retrievePreviousJobInstance(long jobInstanceId, String jobName, String workItem,
+	public JobInstanceStatusEntity retrievePreviousJobInstance(long jobInstanceId, String jobName, String workItem,
 			Boolean successful, Boolean withInput, Boolean withOutput, Boolean forWorkItem) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#retrievePreviousJobInstance()");
@@ -192,9 +191,9 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 		query.append("LIMIT 1");
 		String qlString = String.format(query.toString(), jobInstanceId, jobName);
 
-		Query queryResult = this.em.createNativeQuery(qlString, JobInstanceStatus.class).setFirstResult(0);
+		Query queryResult = this.em.createNativeQuery(qlString, JobInstanceStatusEntity.class).setFirstResult(0);
 		@SuppressWarnings("unchecked")
-		List<JobInstanceStatus> resultList = queryResult.getResultList();
+		List<JobInstanceStatusEntity> resultList = queryResult.getResultList();
 		if (resultList != null && resultList.size() > 0) {
 			return resultList.get(0);
 		}
@@ -202,12 +201,12 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceStatus saveJob(JobInstanceStatus job) {
+	public JobInstanceStatusEntity saveJob(JobInstanceStatusEntity job) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#saveJob()");
 		}
 
-		JobInstanceStatus savedJob = this.jobInstanceRepository.save(job);
+		JobInstanceStatusEntity savedJob = this.jobInstanceRepository.save(job);
 		if (this.log.isDebugEnabled()) {
 			this.log.debug("JobInstanceStatus angelegt: " + savedJob.toString());
 		}
@@ -216,13 +215,13 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceStatus> saveAllJobs(List<JobInstanceStatus> jobs) {
+	public List<JobInstanceStatusEntity> saveAllJobs(List<JobInstanceStatusEntity> jobs) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#saveAllJobs()");
 		}
 
-		List<JobInstanceStatus> savedJobs = new ArrayList<>();
-		Iterable<JobInstanceStatus> iterable = this.jobInstanceRepository.save(jobs);
+		List<JobInstanceStatusEntity> savedJobs = new ArrayList<>();
+		Iterable<JobInstanceStatusEntity> iterable = this.jobInstanceRepository.save(jobs);
 		iterable.forEach(savedJobs::add);
 		if (this.log.isDebugEnabled()) {
 			this.log.debug(savedJobs.size() + " JobInstanceStatus angelegt.");
@@ -232,62 +231,52 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceStatusJson convertJobToJson(JobInstanceStatus job) {
+	public JobInstanceStatus convertJobToJson(JobInstanceStatusEntity job) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#convertJobToJson()");
 		}
 
-		JobInstanceStatusJson response = null;
+		JobInstanceStatus response = null;
 
 		if (job != null) {
-			LocalDateTime timeRangeStart = job.getTimeRangeStart() != null ? job.getTimeRangeStart().toLocalDateTime() : null;
-			LocalDateTime timeRangeEnd = job.getTimeRangeEnd() != null ? job.getTimeRangeEnd().toLocalDateTime() : null;
-			LocalDateTime jobStarted = job.getJobStarted().toLocalDateTime();
-			LocalDateTime jobEnded = job.getJobEnded() != null ? job.getJobEnded().toLocalDateTime() : null;
-
-			response = new JobInstanceStatusJson(job.getJobInstanceId(), job.getProcessInstanceId(),
-					job.getProjectName(), job.getJobName(), job.getJobGUID(), job.getWorkItem(), timeRangeStart,
-					timeRangeEnd, job.getValueRangeStart(), job.getValueRangeEnd(), job.getCountInput(),
-					job.getCountOutput(), job.getCountUpdate(), job.getCountReject(), job.getCountDelete(), jobStarted,
-					jobEnded, job.getJobResult(), job.getReturnCode(), job.getReturnMessage(), job.getHostName(),
-					job.getHostPid(), job.getHostUser());
+			response = new JobInstanceStatus(job.getJobInstanceId(), job.getProcessInstanceId(), job.getProjectName(),
+					job.getJobName(), job.getJobGUID(), job.getWorkItem(), job.getTimeRangeStart(),
+					job.getTimeRangeEnd(), job.getValueRangeStart(), job.getValueRangeEnd(), job.getCountInput(),
+					job.getCountInsert(), job.getCountUpdate(), job.getCountReject(), job.getCountDelete(),
+					job.getJobStarted(), job.getJobEnded(), job.getJobResult(), job.getReturnCode(),
+					job.getReturnMessage(), job.getHostName(), job.getHostPid(), job.getHostUser());
 		}
 
 		return response;
 	}
 
 	@Override
-	public JobInstanceStatus convertJsonToJob(JobInstanceStatusJson json) {
+	public JobInstanceStatusEntity convertJsonToJob(JobInstanceStatus json) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#convertJobToJson()");
 		}
 
-		JobInstanceStatus job = null;
+		JobInstanceStatusEntity job = null;
 
 		if (json != null) {
-			Timestamp timeRangeStart = json.getTimeRangeStart() != null ? Timestamp.valueOf(json.getTimeRangeStart()) : null;
-			Timestamp timeRangeEnd = json.getTimeRangeEnd() != null ? Timestamp.valueOf(json.getTimeRangeEnd()) : null;
-			Timestamp jobStarted = json.getJobStarted() != null ? Timestamp.valueOf(json.getJobStarted()) : null;
-			Timestamp jobEnded = json.getJobEnded() != null ? Timestamp.valueOf(json.getJobEnded()) : null;
-
-			job = new JobInstanceStatus();
+			job = new JobInstanceStatusEntity();
 			job.setJobInstanceId(json.getJobInstanceId());
 			job.setProcessInstanceId(json.getProcessInstanceId());
 			job.setProjectName(json.getProjectName());
 			job.setJobName(json.getJobName());
 			job.setJobGUID(json.getJobGUID());
 			job.setWorkItem(json.getWorkItem());
-			job.setTimeRangeStart(timeRangeStart);
-			job.setTimeRangeEnd(timeRangeEnd);
+			job.setTimeRangeStart(json.getTimeRangeStart());
+			job.setTimeRangeEnd(json.getTimeRangeEnd());
 			job.setValueRangeStart(json.getValueRangeStart());
 			job.setValueRangeEnd(json.getValueRangeEnd());
 			job.setCountInput(json.getCountInput());
-			job.setCountOutput(json.getCountInsert());
+			job.setCountInsert(json.getCountInsert());
 			job.setCountUpdate(json.getCountUpdate());
 			job.setCountReject(json.getCountReject());
 			job.setCountDelete(json.getCountDelete());
-			job.setJobStarted(jobStarted);
-			job.setJobEnded(jobEnded);
+			job.setJobStarted(json.getJobStarted());
+			job.setJobEnded(json.getJobEnded());
 			job.setJobResult(json.getJobResult());
 			job.setReturnCode(json.getReturnCode());
 			job.setReturnMessage(json.getReturnMessage());
@@ -300,7 +289,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceCounter> listAllCounter() {
+	public List<JobInstanceCounterEntity> listAllCounter() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listAllCounter()");
 		}
@@ -309,7 +298,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceCounter> listAllCounterForJob(long id) {
+	public List<JobInstanceCounterEntity> listAllCounterForJob(long id) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#listAllCounterForJob()");
 		}
@@ -318,7 +307,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceCounter getCounterById(long id) {
+	public JobInstanceCounterEntity getCounterById(long id) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#getCounterById()");
 		}
@@ -327,12 +316,12 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceCounter saveCounter(JobInstanceCounter counter) {
+	public JobInstanceCounterEntity saveCounter(JobInstanceCounterEntity counter) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#saveCounter()");
 		}
 
-		JobInstanceCounter savedCounter = this.jobCounterRepository.save(counter);
+		JobInstanceCounterEntity savedCounter = this.jobCounterRepository.save(counter);
 		if (this.log.isDebugEnabled()) {
 			this.log.debug("JobInstanceCounter angelegt: " + savedCounter.toString());
 		}
@@ -341,13 +330,13 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public List<JobInstanceCounter> saveAllCounters(List<JobInstanceCounter> counters) {
+	public List<JobInstanceCounterEntity> saveAllCounters(List<JobInstanceCounterEntity> counters) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#saveAllCounters()");
 		}
 
-		List<JobInstanceCounter> savedCounters = new ArrayList<>();
-		Iterable<JobInstanceCounter> iterable = this.jobCounterRepository.save(counters);
+		List<JobInstanceCounterEntity> savedCounters = new ArrayList<>();
+		Iterable<JobInstanceCounterEntity> iterable = this.jobCounterRepository.save(counters);
 		iterable.forEach(savedCounters::add);
 		if (this.log.isDebugEnabled()) {
 			this.log.debug(savedCounters.size() + " JobInstanceCounter angelegt.");
@@ -357,15 +346,15 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceCounterJson convertCounterToJson(JobInstanceCounter counter) {
+	public JobInstanceCounter convertCounterToJson(JobInstanceCounterEntity counter) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#convertCounterToJson()");
 		}
 
-		JobInstanceCounterJson response = null;
+		JobInstanceCounter response = null;
 
 		if (counter != null) {
-			response = new JobInstanceCounterJson(counter.getJobCounterId(), counter.getJobInstanceId(),
+			response = new JobInstanceCounter(counter.getJobCounterId(), counter.getJobInstanceId(),
 					counter.getCounterType(), counter.getCounterName(), counter.getCounterValue());
 		}
 
@@ -373,17 +362,17 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public JobInstanceCounter convertJsonToCounter(JobInstanceCounterJson json) {
+	public JobInstanceCounterEntity convertJsonToCounter(JobInstanceCounter json) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#convertCounterToJson()");
 		}
 
-		JobInstanceCounter counter = null;
+		JobInstanceCounterEntity counter = null;
 
 		if (json != null) {
 			Long jobCounterId = json.getJobCounterId();
 
-			counter = new JobInstanceCounter();
+			counter = new JobInstanceCounterEntity();
 			if (jobCounterId != null) {
 				counter.setJobCounterId(jobCounterId);
 			}
@@ -404,7 +393,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	 * @throws Exception
 	 */
 	@Override
-	public JobInstanceJobJson createJobInstance(long jobInstanceId, JobInstanceStatusJson resource) {
+	public JobInstanceJob createJobInstance(long jobInstanceId, JobInstanceStatus resource) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#createRootJobRun()");
 		}
@@ -418,7 +407,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 		Long processInstanceId = resource.getProcessInstanceId();
 		boolean isCalledJob = processInstanceId != null && processInstanceId >= 0;
 
-		JobInstanceJobJson json = new JobInstanceJobJson(resource);
+		JobInstanceJob json = new JobInstanceJob(resource);
 
 		if (log.isDebugEnabled()) {
 			if (isCalledJob) {
@@ -432,57 +421,57 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 	}
 
 	@Override
-	public void retrievePreviousInstanceData(JobInstanceJobJson job, Boolean successful, Boolean withInput,
+	public void retrievePreviousInstanceData(JobInstanceJob job, Boolean successful, Boolean withInput,
 			Boolean withOutput, Boolean forWorkItem) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#retrievePreviousInstanceData()");
 		}
 
 		if (job.getPreviousJob() == null) {
-			JobInstanceStatusJson currentJob = job.getCurrentJob();
-			JobInstanceStatus previousJob = retrievePreviousJobInstance(currentJob.getJobInstanceId(),
+			JobInstanceStatus currentJob = job.getCurrentJob();
+			JobInstanceStatusEntity previousJob = retrievePreviousJobInstance(currentJob.getJobInstanceId(),
 					currentJob.getJobName(), currentJob.getWorkItem(), successful, withInput, withOutput, forWorkItem);
-			job.setPreviousJobs(convertJobToJson(previousJob));
+			job.setPreviousJob(convertJobToJson(previousJob));
 		}
 	}
 
 	@Override
-	public void createCounter(JobInstanceJobJson job, String counterName, CatalogJson counterType,
+	public void createCounter(JobInstanceJob job, String counterName, CatalogJson counterType,
 			long counterValue) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#createCounter()");
 		}
 
-		JobInstanceCounterJson json = new JobInstanceCounterJson(null, job.getCurrentJob().getJobInstanceId(),
+		JobInstanceCounter json = new JobInstanceCounter(null, job.getCurrentJob().getJobInstanceId(),
 				counterType.getCatalogId(), counterName, counterValue);
 
 		job.addCounter(json);
 	}
 
 	@Override
-	public Long persistJobInstance(JobInstanceJobJson job) {
+	public Long persistJobInstance(JobInstanceJob job) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#persistJobInstance()");
 		}
 
-		Map<Long, JobInstanceJobJson> jobToSave = new HashMap<>();
+		Map<Long, JobInstanceJob> jobToSave = new HashMap<>();
 		jobToSave.put(job.getCurrentJob().getJobInstanceId(), job);
 
 		return persistJobInstanceAll(jobToSave).get(0);
 	}
 
 	@Override
-	public List<Long> persistJobInstanceAll(Map<Long, JobInstanceJobJson> jobs) {
+	public List<Long> persistJobInstanceAll(Map<Long, JobInstanceJob> jobs) {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#persistJobInstanceAll()");
 		}
 
-		Map<Long, JobInstanceStatus> jobsToSave = new HashMap<>();
-		List<JobInstanceCounter> counterToSave = new ArrayList<>();
+		Map<Long, JobInstanceStatusEntity> jobsToSave = new HashMap<>();
+		List<JobInstanceCounterEntity> counterToSave = new ArrayList<>();
 
-		for (Map.Entry<Long, JobInstanceJobJson> job : jobs.entrySet()) {
-			JobInstanceStatusJson jobInstanceJson = job.getValue().getCurrentJob();
-			List<JobInstanceCounterJson> counterJson = job.getValue().getCounters();
+		for (Map.Entry<Long, JobInstanceJob> job : jobs.entrySet()) {
+			JobInstanceStatus jobInstanceJson = job.getValue().getCurrentJob();
+			List<JobInstanceCounter> counterJson = job.getValue().getCounters();
 
 			int countInput = 0;
 			int countInsert = 0;
@@ -491,10 +480,10 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			int countDelete = 0;
 
 			if (counterJson != null && !counterJson.isEmpty()) {
-				for (JobInstanceCounterJson counter : counterJson) {
+				for (JobInstanceCounter counter : counterJson) {
 					CounterType counterType;
 					try {
-						Catalog counterTypeCatalog = this.counterCatalogs.get(counter.getCounterType());
+						CatalogEntity counterTypeCatalog = this.counterCatalogs.get(counter.getCounterType());
 
 						counterType = CounterType.valueBySysname(counterTypeCatalog.getSysname());
 						switch (counterType) {
@@ -539,7 +528,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			saveAllJobs(jobsToSave.entrySet().stream()
 					.map(e -> e.getValue()).collect(Collectors.toList()))
 					.forEach(savedJob -> {
-						JobInstanceJobJson job = jobs.get(savedJob.getJobInstanceId());
+						JobInstanceJob job = jobs.get(savedJob.getJobInstanceId());
 						job.setCurrentJob(convertJobToJson(savedJob));
 					});
 		}
@@ -550,7 +539,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			// Counter in allen Json Jobs neu befüllen
 			saveAllCounters(counterToSave)
 					.forEach(savedCounter -> {
-						JobInstanceJobJson job = jobs.get(savedCounter.getJobInstanceId());
+						JobInstanceJob job = jobs.get(savedCounter.getJobInstanceId());
 						job.addCounter(convertCounterToJson(savedCounter));
 					});
 		}

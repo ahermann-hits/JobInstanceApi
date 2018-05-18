@@ -1,6 +1,6 @@
 package de.hits.jobinstance.domain;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,7 +15,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "job_instance_status", schema = "manage")
-public class JobInstanceStatus {
+public class JobInstanceStatusEntity {
 
 	@Id
 	@Column(name = "JOB_INSTANCE_ID", nullable = false, insertable = true, updatable = false)
@@ -34,9 +34,9 @@ public class JobInstanceStatus {
 	private String workItem;
 
 	@Column(name = "TIME_RANGE_START", nullable = true, insertable = true, updatable = true)
-	private Timestamp timeRangeStart;
+	private LocalDateTime timeRangeStart;
 	@Column(name = "TIME_RANGE_END", nullable = true, insertable = true, updatable = true)
-	private Timestamp timeRangeEnd;
+	private LocalDateTime timeRangeEnd;
 	@Column(name = "VALUE_RANGE_START", nullable = true, insertable = true, updatable = true)
 	private Long valueRangeStart;
 	@Column(name = "VALUE_RANGE_END", nullable = true, insertable = true, updatable = true)
@@ -44,9 +44,8 @@ public class JobInstanceStatus {
 
 	@Column(name = "COUNT_INPUT", nullable = true, insertable = true, updatable = true)
 	private Integer countInput;
-	// FIXME: count_output muss zu count_insert werden.
-	@Column(name = "COUNT_OUTPUT", nullable = true, insertable = true, updatable = true)
-	private Integer countOutput;
+	@Column(name = "COUNT_INSERT", nullable = true, insertable = true, updatable = true)
+	private Integer countInsert;
 	@Column(name = "COUNT_UPDATE", nullable = true, insertable = true, updatable = true)
 	private Integer countUpdate;
 	@Column(name = "COUNT_REJECT", nullable = true, insertable = true, updatable = true)
@@ -55,9 +54,9 @@ public class JobInstanceStatus {
 	private Integer countDelete;
 
 	@Column(name = "JOB_STARTED", nullable = false, insertable = true, updatable = false)
-	private Timestamp jobStarted;
+	private LocalDateTime jobStarted;
 	@Column(name = "JOB_ENDED", nullable = true, insertable = true, updatable = true)
-	private Timestamp jobEnded;
+	private LocalDateTime jobEnded;
 	@Column(name = "JOB_RESULT", nullable = true, insertable = true, updatable = true, length = 1024)
 	private String jobResult;
 
@@ -72,19 +71,10 @@ public class JobInstanceStatus {
 	private Integer hostPid;
 	@Column(name = "HOST_USER", nullable = true, insertable = true, updatable = true, length = 128)
 	private String hostUser;
+	@Column(name = "SERVICE_USER", nullable = true, insertable = true, updatable = true, length = 128)
+	private String serviceUser;
 
-	public JobInstanceStatus() {}
-
-	// Handled by the controller.
-//	@PrePersist
-//	public void prePersist() {
-//		setJobStarted(new Timestamp(new java.util.Date().getTime()));
-//	}
-//
-//	@PreUpdate
-//	public void preUpdate() {
-//		setJobEnded(new Timestamp(new java.util.Date().getTime()));
-//	}
+	public JobInstanceStatusEntity() {}
 
 	/**
 	 * @return the jobInstanceId
@@ -179,7 +169,7 @@ public class JobInstanceStatus {
 	/**
 	 * @return the timeRangeStart
 	 */
-	public Timestamp getTimeRangeStart() {
+	public LocalDateTime getTimeRangeStart() {
 		return timeRangeStart;
 	}
 
@@ -187,14 +177,14 @@ public class JobInstanceStatus {
 	 * @param timeRangeStart
 	 *            the timeRangeStart to set
 	 */
-	public void setTimeRangeStart(Timestamp timeRangeStart) {
+	public void setTimeRangeStart(LocalDateTime timeRangeStart) {
 		this.timeRangeStart = timeRangeStart;
 	}
 
 	/**
 	 * @return the timeRangeEnd
 	 */
-	public Timestamp getTimeRangeEnd() {
+	public LocalDateTime getTimeRangeEnd() {
 		return timeRangeEnd;
 	}
 
@@ -202,7 +192,7 @@ public class JobInstanceStatus {
 	 * @param timeRangeEnd
 	 *            the timeRangeEnd to set
 	 */
-	public void setTimeRangeEnd(Timestamp timeRangeEnd) {
+	public void setTimeRangeEnd(LocalDateTime timeRangeEnd) {
 		this.timeRangeEnd = timeRangeEnd;
 	}
 
@@ -254,16 +244,16 @@ public class JobInstanceStatus {
 	/**
 	 * @return the countOutput
 	 */
-	public Integer getCountOutput() {
-		return countOutput;
+	public Integer getCountInsert() {
+		return countInsert;
 	}
 
 	/**
-	 * @param countOutput
-	 *            the countOutput to set
+	 * @param countInsert
+	 *            the countInsert to set
 	 */
-	public void setCountOutput(Integer countOutput) {
-		this.countOutput = countOutput;
+	public void setCountInsert(Integer countInsert) {
+		this.countInsert = countInsert;
 	}
 
 	/**
@@ -314,7 +304,7 @@ public class JobInstanceStatus {
 	/**
 	 * @return the jobStarted
 	 */
-	public Timestamp getJobStarted() {
+	public LocalDateTime getJobStarted() {
 		return jobStarted;
 	}
 
@@ -322,14 +312,14 @@ public class JobInstanceStatus {
 	 * @param jobStarted
 	 *            the jobStarted to set
 	 */
-	public void setJobStarted(Timestamp jobStarted) {
+	public void setJobStarted(LocalDateTime jobStarted) {
 		this.jobStarted = jobStarted;
 	}
 
 	/**
 	 * @return the jobEnded
 	 */
-	public Timestamp getJobEnded() {
+	public LocalDateTime getJobEnded() {
 		return jobEnded;
 	}
 
@@ -337,7 +327,7 @@ public class JobInstanceStatus {
 	 * @param jobEnded
 	 *            the jobEnded to set
 	 */
-	public void setJobEnded(Timestamp jobEnded) {
+	public void setJobEnded(LocalDateTime jobEnded) {
 		this.jobEnded = jobEnded;
 	}
 

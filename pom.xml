@@ -4,33 +4,51 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>de.hits.jobinstance</groupId>
-	<artifactId>job-instance-api</artifactId>
-	<version>0.0.2.RELEASE</version>
+	<artifactId>api</artifactId>
+	<version>0.0.3.SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>JobInstance REST API</name>
 	<description></description>
+
 	<organization>
 		<name>HiTS</name>
 	</organization>
+
+	<developers>
+		<developer>
+			<id>ahermann</id>
+			<name>André Hermann</name>
+			<email>andre-hermann@gmx.net</email>
+			<organization>HITS</organization>
+			<timezone>UTC+1/CET</timezone>
+		</developer>
+	</developers>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 
-		<springboot.version>1.5.10.RELEASE</springboot.version>
-		<spring.version>4.3.14.RELEASE</spring.version>
-		<jackson.version>2.9.4</jackson.version>
+		<springboot.version>1.5.13.RELEASE</springboot.version>
+		<spring.version>4.3.15.RELEASE</spring.version>
+		<jackson.version>2.9.5</jackson.version>
 		<swagger.version>2.8.0</swagger.version>
 	</properties>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.10.RELEASE</version>
+		<version>1.5.13.RELEASE</version>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>de.hits.jobinstance</groupId>
+			<artifactId>common-objects</artifactId>
+			<version>0.0.1.RELEASE</version>
+		</dependency>
+
+		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -61,12 +79,18 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 			<version>${springboot.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<version>${springboot.version}</version>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.1</version>
+			<version>42.2.2</version>
 		</dependency>
 
 		<dependency>
@@ -146,6 +170,60 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<!-- create javadoc.jar -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+						<!-- The maven-javadoc-plugin does not accept that Java is in progress and 
+							makes trouble with the Java 8 javadoc annotations: @apiNote,
+							@implSpec and @implNote. There are two ways to handle this issue:
+							1. deactivate 'docLint', what causes that the javadoc creation is
+							   successfully but with warnings, or
+							2. set that errors does not cause an abort of the javadoc creation.
+							Actual docLint is deactivated. -->
+							<additionalparam>-Xdoclint:none</additionalparam>
+							<!--
+							<failOnError>false</failOnError>
+							 -->
+						</configuration>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- force links to Java 8 documentation (should happen automatically 
+						but doesn't) -->
+					<javaApiLinks>
+						<property>
+							<name>api_1.8</name>
+							<value>https://docs.oracle.com/javase/8/docs/api/</value>
+						</property>
+					</javaApiLinks>
+					<tags>
+						<tag>
+							<name>apiNote</name>
+							<placement>a</placement>
+							<head>API Note:</head>
+						</tag>
+						<tag>
+							<name>implSpec</name>
+							<placement>a</placement>
+							<head>Implementation Requirements:</head>
+						</tag>
+						<tag>
+							<name>implNote</name>
+							<placement>a</placement>
+							<head>Implementation Note:</head>
+						</tag>
+					</tags>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

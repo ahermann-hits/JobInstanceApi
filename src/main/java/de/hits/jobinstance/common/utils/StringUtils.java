@@ -57,4 +57,18 @@ public class StringUtils {
 
 		return result;
 	}
+
+	public static boolean equals(String str, String compare) {
+		boolean result = false;
+
+		if (str == null) {
+			result = compare == null;
+		} else if (compare == null) {
+			result = false;
+		} else {
+			result = str.trim().equalsIgnoreCase(compare.trim());
+		}
+
+		return result;
+	}
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.repository.CrudRepository;
 
-import de.hits.jobinstance.domain.JobInstanceStatus;
+import de.hits.jobinstance.domain.JobInstanceStatusEntity;
 
 /**
  * 
@@ -12,18 +12,18 @@ import de.hits.jobinstance.domain.JobInstanceStatus;
  * @since 08.02.2018
  * @version 1.0
  */
-public interface JobInstanceStatusRepository extends CrudRepository<JobInstanceStatus, Long> {
+public interface JobInstanceStatusRepository extends CrudRepository<JobInstanceStatusEntity, Long> {
 
 	/**
 	 * 
 	 * @return
 	 */
-	List<JobInstanceStatus> findAllByOrderByJobInstanceId();
+	List<JobInstanceStatusEntity> findAllByOrderByJobInstanceId();
 
 	/**
 	 * 
 	 * @param id
 	 * @return
 	 */
-	List<JobInstanceStatus> findByProcessInstanceIdOrderByJobInstanceId(long id);
+	List<JobInstanceStatusEntity> findByProcessInstanceIdOrderByJobInstanceId(long id);
 }

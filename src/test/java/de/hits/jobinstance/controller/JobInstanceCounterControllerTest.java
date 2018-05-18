@@ -16,10 +16,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
 import de.hits.jobinstance.JobInstanceApiTest;
+import de.hits.jobinstance.common.data.JobInstanceCounter;
+import de.hits.jobinstance.common.data.JobInstanceJob;
+import de.hits.jobinstance.common.data.JobInstanceStatus;
 import de.hits.jobinstance.common.utils.test.IntegrationTestUtil;
-import de.hits.jobinstance.data.JobInstanceCounterJson;
-import de.hits.jobinstance.data.JobInstanceJobJson;
-import de.hits.jobinstance.data.JobInstanceStatusJson;
 
 /**
  * 
@@ -36,7 +36,7 @@ public class JobInstanceCounterControllerTest extends JobInstanceApiTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andReturn();
 
-		List<JobInstanceCounterJson> responseList = IntegrationTestUtil.convertResponseToJobCounterJsonList(result);
+		List<JobInstanceCounter> responseList = IntegrationTestUtil.convertResponseToJobCounterJsonList(result);
 		assertTrue(responseList.size() > 0);
 	}
 
@@ -47,8 +47,8 @@ public class JobInstanceCounterControllerTest extends JobInstanceApiTest {
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
 				.andReturn();
 
-		JobInstanceJobJson jobToTest = IntegrationTestUtil.convertResponseToJobInstanceJsonList(resultJob).stream().filter(job -> {
-			JobInstanceStatusJson currentJob = job.getCurrentJob();
+		JobInstanceJob jobToTest = IntegrationTestUtil.convertResponseToJobInstanceJsonList(resultJob).stream().filter(job -> {
+			JobInstanceStatus currentJob = job.getCurrentJob();
 			if (currentJob != null && currentJob.getCountInsert() != null && currentJob.getCountInsert() > 0) {
 				return true;
 			}
@@ -56,7 +56,7 @@ public class JobInstanceCounterControllerTest extends JobInstanceApiTest {
 		}).findFirst().get();
 		assertNotNull(jobToTest);
 
-		JobInstanceStatusJson currentJob = jobToTest.getCurrentJob();
+		JobInstanceStatus currentJob = jobToTest.getCurrentJob();
 		String jobInstanceIdToTest = "" + currentJob.getJobInstanceId();
 
 		MvcResult resultCounter = this.mockMvc.perform(get("/job/api/counter").param("job", jobInstanceIdToTest))
@@ -65,8 +65,8 @@ public class JobInstanceCounterControllerTest extends JobInstanceApiTest {
 				.andDo(print())
 				.andReturn();
 
-		List<JobInstanceCounterJson> counterList = IntegrationTestUtil.convertResponseToJobCounterJsonList(resultCounter);
-		List<JobInstanceCounterJson> counterFiltered = counterList.stream().filter(counter -> counter.getJobInstanceId() == currentJob.getJobInstanceId()).collect(Collectors.toList());
+		List<JobInstanceCounter> counterList = IntegrationTestUtil.convertResponseToJobCounterJsonList(resultCounter);
+		List<JobInstanceCounter> counterFiltered = counterList.stream().filter(counter -> counter.getJobInstanceId() == currentJob.getJobInstanceId()).collect(Collectors.toList());
 		assertEquals(counterList.size(), counterFiltered.size());
 	}
 }
