@@ -29,10 +29,20 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
 
-		<springboot.version>1.5.13.RELEASE</springboot.version>
-		<spring.version>4.3.15.RELEASE</spring.version>
+		<!--
+			Overwriting Spring Boot (1.5.13.RELEASE) dependencies
+			https://github.com/spring-projects/spring-boot/blob/v1.5.13.RELEASE/spring-boot-dependencies/pom.xml
+		-->
+		<spring.version>4.3.17.RELEASE</spring.version>
+		<logback.version>1.2.3</logback.version>
 		<jackson.version>2.9.5</jackson.version>
+		<json-path.version>2.2.0</json-path.version>
+		<maven-javadoc-plugin.version>2.10.4</maven-javadoc-plugin.version>
+
+		<commons-collections.version>3.2.2</commons-collections.version>
 		<swagger.version>2.8.0</swagger.version>
+		<swagger.ui.version>2.8.0</swagger.ui.version>
+		<postgresql.version>42.2.2</postgresql.version>
 	</properties>
 
 	<parent>
@@ -52,94 +62,82 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-rest</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-			<version>${springboot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
-			<version>${springboot.version}</version>
 			<optional>true</optional>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+		<!-- PostgreSQL -->
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.2</version>
+			<version>${postgresql.version}</version><!--$NO-MVN-MAN-VER$-->
 		</dependency>
 
 		<dependency>
 			<groupId>commons-collections</groupId>
 			<artifactId>commons-collections</artifactId>
+			<version>${commons-collections.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<!-- Jackson -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+		<!-- Swagger -->
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>${swagger.version}</version>
 			<scope>compile</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
-			<!-- The actual version of swagger ui is not working very well, that is why I had chosen this old version. -->
-			<version>2.6.0</version>
+			<version>${swagger.ui.version}</version>
 			<scope>compile</scope>
 		</dependency>
 
+		<!-- For Testing -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<version>${springboot.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -159,7 +157,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>${springboot.version}</version>
 				<configuration>
 					<executable>true</executable>
 				</configuration>
@@ -171,11 +168,11 @@
 					</execution>
 				</executions>
 			</plugin>
+<!--
 			<plugin>
-				<!-- create javadoc.jar -->
+				<!- - create javadoc.jar - ->
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -183,23 +180,23 @@
 							<goal>jar</goal>
 						</goals>
 						<configuration>
-						<!-- The maven-javadoc-plugin does not accept that Java is in progress and 
+						<!- - The maven-javadoc-plugin does not accept that Java is in progress and 
 							makes trouble with the Java 8 javadoc annotations: @apiNote,
 							@implSpec and @implNote. There are two ways to handle this issue:
 							1. deactivate 'docLint', what causes that the javadoc creation is
 							   successfully but with warnings, or
 							2. set that errors does not cause an abort of the javadoc creation.
-							Actual docLint is deactivated. -->
+							Actual docLint is deactivated. - ->
 							<additionalparam>-Xdoclint:none</additionalparam>
-							<!--
+							<!- -
 							<failOnError>false</failOnError>
-							 -->
+							 - ->
 						</configuration>
 					</execution>
 				</executions>
 				<configuration>
-					<!-- force links to Java 8 documentation (should happen automatically 
-						but doesn't) -->
+					<!- - force links to Java 8 documentation (should happen automatically 
+						but doesn't) - ->
 					<javaApiLinks>
 						<property>
 							<name>api_1.8</name>
@@ -225,6 +222,7 @@
 					</tags>
 				</configuration>
 			</plugin>
+-->
 		</plugins>
 	</build>
 

@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 
 /**
  * 
@@ -20,11 +19,7 @@ import org.springframework.context.annotation.PropertySources;
  * @version 1.0
  */
 @Configuration
-@PropertySources({
-	@PropertySource("classpath:application-${spring.profiles.active}.properties"),
-	// extend classpath application configuration by external resource file
-	@PropertySource(value = "file:./application-${spring.profiles.active}.properties", ignoreResourceNotFound = true)
-})
+@PropertySource(value = "file:/var/data/JobInstance/api/application-${spring.profiles.active}.properties", ignoreResourceNotFound = false)
 @SpringBootApplication
 @EnableAutoConfiguration
 public class JobInstanceApi implements CommandLineRunner {

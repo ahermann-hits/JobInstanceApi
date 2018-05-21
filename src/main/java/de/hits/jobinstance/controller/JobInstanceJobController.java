@@ -136,7 +136,7 @@ public class JobInstanceJobController {
 	}
 
 	@PreDestroy
-	public void shutdownController() {
+	private void shutdownController() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#shutdownController()");
 		}
@@ -148,10 +148,11 @@ public class JobInstanceJobController {
 			this.log.info(String.format("... User: %s, requests: %s.", user.getKey(), user.getValue().intValue()));
 		}
 
-		this.workCache.setLogging(false);
+		this.workCache.setLogging(true);
 		this.workCache.setMonitoring(false, -1);
 		this.log.info("... Work cache statistics:");
-		this.workCache.monitor();
+		this.workCache.monitor(false);
+		this.workCache.setLogging(false);
 
 		this.log.info("... Persist write cache ...");
 		persistWriteCache();
@@ -217,8 +218,8 @@ public class JobInstanceJobController {
 				resource.setJobStarted(LocalDateTime.now());
 			}
 
+			resource.setServiceUser(userName);
 			response = this.jobService.createJobInstance(jobInstanceId, resource);
-			response.setAuthentication(userName);
 
 			this.workCache.put(jobInstanceId, response);
 		}
@@ -236,13 +237,14 @@ public class JobInstanceJobController {
 
 		this.counterSaved.getAndIncrement();
 		String userName = addRequestForUserCounter();
-		String givenUserName = resource.getAuthentication();
-		if (!StringUtils.equals(userName, givenUserName)) {
-			log.info("Mismatch between the user name of the given request object and the authentication. ");
-		}
-		resource.setAuthentication(userName);
 
 		JobInstanceStatus currentJob = resource.getCurrentJob();
+		String givenUserName = currentJob.getServiceUser();
+		if (!StringUtils.equals(userName, givenUserName)) {
+			log.info("Mismatch between the user name of the given request object and the authentication. Maybe a fault in the requesting software or a hijacked job.");
+		}
+		currentJob.setServiceUser(userName);
+
 		long jobInstanceId = currentJob.getJobInstanceId();
 		if (currentJob.getJobEnded() == null) {
 			currentJob.setJobEnded(LocalDateTime.now());

@@ -223,7 +223,7 @@ public class SimpleManagingCache<K, V> {
 					} catch (InterruptedException ex) {
 					}
 
-					monitor();
+					monitor(true);
 				}
 			}
 		});
@@ -232,7 +232,7 @@ public class SimpleManagingCache<K, V> {
 		thread.start();
 	}
 
-	public void monitor() {
+	public void monitor(boolean logToConsole) {
 		if (loggingEnabled && log.isTraceEnabled()) {
 			log.trace(getClass().getSimpleName() + "#monitor()");
 		}
@@ -259,24 +259,42 @@ public class SimpleManagingCache<K, V> {
 		});
 
 		if (loggingEnabled) {
-			StringBuilder msg = new StringBuilder();
-			msg.append("Monitoring:\n");
-			msg.append("  Requests:\n");
-			msg.append(String.format("    Inserted entries:         %s\n", insertedCount));
-			msg.append(String.format("    Removed entries:          %s\n", removedCount));
-			msg.append(String.format("    Killed entries:           %s\n", killedCount));
-			msg.append(String.format("    Requested entries:        %s\n", requestedCount));
-			msg.append(String.format("    Actions summary:          %s\n", sumRequests));
-			msg.append("  Cache health:\n");
-			msg.append(String.format("    Actual cache size:        %s\n", cacheSize));
-			msg.append("   .=============================.\n");
-			msg.append("   | Age in minutes | Count      |\n");
-			msg.append("   .-----------------------------.\n");
-			reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
-					entry -> msg.append(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
-			msg.append("   .=============================.");
-
-			log.info(msg.toString());
+			if (logToConsole) {
+				StringBuilder msg = new StringBuilder();
+				msg.append("Monitoring:\n");
+				msg.append("  Requests:\n");
+				msg.append(String.format("    Inserted entries:         %s\n", insertedCount));
+				msg.append(String.format("    Removed entries:          %s\n", removedCount));
+				msg.append(String.format("    Killed entries:           %s\n", killedCount));
+				msg.append(String.format("    Requested entries:        %s\n", requestedCount));
+				msg.append(String.format("    Actions summary:          %s\n", sumRequests));
+				msg.append("  Cache health:\n");
+				msg.append(String.format("    Actual cache size:        %s\n", cacheSize));
+				msg.append("   .=============================.\n");
+				msg.append("   | Age in minutes | Count      |\n");
+				msg.append("   .-----------------------------.\n");
+				reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
+						entry -> msg.append(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
+				msg.append("   .=============================.");
+				
+				log.info(msg.toString());
+			} else {
+				log.info("Monitoring:\n");
+				log.info("  Requests:\n");
+				log.info(String.format("    Inserted entries:         %s\n", insertedCount));
+				log.info(String.format("    Removed entries:          %s\n", removedCount));
+				log.info(String.format("    Killed entries:           %s\n", killedCount));
+				log.info(String.format("    Requested entries:        %s\n", requestedCount));
+				log.info(String.format("    Actions summary:          %s\n", sumRequests));
+				log.info("  Cache health:\n");
+				log.info(String.format("    Actual cache size:        %s\n", cacheSize));
+				log.info("   .=============================.\n");
+				log.info("   | Age in minutes | Count      |\n");
+				log.info("   .-----------------------------.\n");
+				reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
+						entry -> log.info(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
+				log.info("   .=============================.");
+			}
 		}
 	}
 

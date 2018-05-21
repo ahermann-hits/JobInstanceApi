@@ -1,12 +1,7 @@
 package de.hits.jobinstance.configuration;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.context.annotation.PropertySources;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
 import org.springframework.security.config.annotation.authentication.configurers.provisioning.UserDetailsManagerConfigurer;
@@ -16,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 
 import de.hits.jobinstance.common.PasswordGenerator;
 import de.hits.jobinstance.common.utils.StringUtils;
+import de.hits.jobinstance.configuration.properties.UserProperties;
 
 /**
  * Web security configuration class for this microservice.<br>
@@ -29,8 +25,7 @@ import de.hits.jobinstance.common.utils.StringUtils;
  * the admin-role and the documentation functions are provided without
  * authorisation for everyone.<br>
  * <br>
- * This configuration requires the property file
- * '/var/data/microservices/ConflictDetection/user-&lt;profile&gt;.properties'.
+ * This configuration requires the property file of the class {@link UserProperties}.
  * 
  * @author André Hermann
  * @since 08.03.2018
@@ -38,31 +33,13 @@ import de.hits.jobinstance.common.utils.StringUtils;
  */
 @Configuration
 @EnableWebSecurity
-@PropertySources({
-		@PropertySource(value = "classpath:config/user-${spring.profiles.active}.properties", ignoreResourceNotFound = true),
-		@PropertySource(value = "file:./user-${spring.profiles.active}.properties", ignoreResourceNotFound = true)
-})
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	private static final String ROLE_ADMIN = "ADMIN";
 	private static final String ROLE_USER = "USER";
 
-	/**
-	 * The parameter of the administrator account containing user name and password
-	 * separated by a double dot. <br>
-	 * <br>
-	 * Example: admin:hallo
-	 */
-	@Value("${api.role.admin}")
-	private String admin;
-	/**
-	 * The parameter of all functional users. The value must be a comma separated
-	 * list of pairs of user name and password separated by a double dot.<br>
-	 * <br>
-	 * Example: app1:hallo,app2:world
-	 */
-	@Value("#{'${api.role.users}'.split(',')}")
-	private List<String> users;
+	@Autowired
+	private UserProperties userProperties;
 
 	@Autowired
 	private PasswordGenerator pwdGenerator;
@@ -88,7 +65,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		String special = null;
 
 		// Split the configured admin account.
-		String[] adminProperties = admin.split(":");
+		String[] adminProperties = userProperties.getAdmin().split(":");
 		String adminUser = adminProperties[0];
 		String adminPwd = adminProperties[1];
 
@@ -112,7 +89,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				"  Admin:  " + adminUser + " : " + adminPwd + (replaceAdminPassword ? " (replaced)" : " (configured)"));
 		System.out.println("  Users:");
 
-		for (String user : users) {
+		for (String user : userProperties.getUsers()) {
 			String[] keyValue = user.split(":");
 			String userName = keyValue[0];
 			String userPwd = keyValue[1];

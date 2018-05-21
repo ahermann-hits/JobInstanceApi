@@ -163,8 +163,8 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 		}
 		String withOutputStr = "";
 		if (withOutput != null) {
-			withOutputStr = withOutput ? "AND (j.count_output > 0 OR j.count_update > 0) "
-					: "AND j.count_output = 0 AND j.count_update = 0 ";
+			withOutputStr = withOutput ? "AND (j.count_insert > 0 OR j.count_update > 0) "
+					: "AND j.count_insert = 0 AND j.count_update = 0 ";
 		}
 		String forWorkItemStr = "";
 		if (workItem != null) {
@@ -244,7 +244,8 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 					job.getTimeRangeEnd(), job.getValueRangeStart(), job.getValueRangeEnd(), job.getCountInput(),
 					job.getCountInsert(), job.getCountUpdate(), job.getCountReject(), job.getCountDelete(),
 					job.getJobStarted(), job.getJobEnded(), job.getJobResult(), job.getReturnCode(),
-					job.getReturnMessage(), job.getHostName(), job.getHostPid(), job.getHostUser());
+					job.getReturnMessage(), job.getHostName(), job.getHostPid(), job.getHostUser(),
+					job.getServiceUser());
 		}
 
 		return response;
@@ -283,6 +284,7 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 			job.setHostName(json.getHostName());
 			job.setHostPid(json.getHostPid());
 			job.setHostUser(json.getHostUser());
+			job.setServiceUser(json.getServiceUser());
 		}
 
 		return job;

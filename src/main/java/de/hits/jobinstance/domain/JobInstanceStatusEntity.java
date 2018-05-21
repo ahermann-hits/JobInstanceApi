@@ -421,6 +421,21 @@ public class JobInstanceStatusEntity {
 		this.hostUser = hostUser;
 	}
 
+	/**
+	 * @return the serviceUser
+	 */
+	public String getServiceUser() {
+		return serviceUser;
+	}
+
+	/**
+	 * @param serviceUser
+	 *            the serviceUser to set
+	 */
+	public void setServiceUser(String serviceUser) {
+		this.serviceUser = serviceUser;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("Job[id='%s', process='%s', name='%s', item='%s']", getJobInstanceId(),
