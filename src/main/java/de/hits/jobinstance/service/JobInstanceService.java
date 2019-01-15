@@ -182,10 +182,4 @@ public interface JobInstanceService {
 	 * @return
 	 */
 	List<Long> persistJobInstanceAll(Map<Long, JobInstanceJob> jobs);
-
-	/**
-	 * 
-	 * @return
-	 */
-	String generateProcessUUID();
 }

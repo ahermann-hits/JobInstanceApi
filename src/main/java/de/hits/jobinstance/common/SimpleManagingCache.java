@@ -279,20 +279,20 @@ public class SimpleManagingCache<K, V> {
 				
 				log.info(msg.toString());
 			} else {
-				log.info("Monitoring:\n");
-				log.info("  Requests:\n");
-				log.info(String.format("    Inserted entries:         %s\n", insertedCount));
-				log.info(String.format("    Removed entries:          %s\n", removedCount));
-				log.info(String.format("    Killed entries:           %s\n", killedCount));
-				log.info(String.format("    Requested entries:        %s\n", requestedCount));
-				log.info(String.format("    Actions summary:          %s\n", sumRequests));
-				log.info("  Cache health:\n");
-				log.info(String.format("    Actual cache size:        %s\n", cacheSize));
-				log.info("   .=============================.\n");
-				log.info("   | Age in minutes | Count      |\n");
-				log.info("   .-----------------------------.\n");
+				log.info("Monitoring:");
+				log.info("  Requests:");
+				log.info(String.format("    Inserted entries:         %s", insertedCount));
+				log.info(String.format("    Removed entries:          %s", removedCount));
+				log.info(String.format("    Killed entries:           %s", killedCount));
+				log.info(String.format("    Requested entries:        %s", requestedCount));
+				log.info(String.format("    Actions summary:          %s", sumRequests));
+				log.info("  Cache health:");
+				log.info(String.format("    Actual cache size:        %s", cacheSize));
+				log.info("   .=============================.");
+				log.info("   | Age in minutes | Count      |");
+				log.info("   .-----------------------------.");
 				reducedMap.entrySet().stream().sorted(Map.Entry.comparingByKey()).forEachOrdered(
-						entry -> log.info(String.format("   | %-14s | %-10s |\n", entry.getKey(), entry.getValue())));
+						entry -> log.info(String.format("   | %-14s | %-10s |", entry.getKey(), entry.getValue())));
 				log.info("   .=============================.");
 			}
 		}

@@ -549,8 +549,11 @@ public class JobInstanceServiceImpl implements JobInstanceService {
 		return jobsToSave.keySet().stream().collect(Collectors.toList());
 	}
 
-	@Override
-	public String generateProcessUUID() {
+	/**
+	 * 
+	 * @return
+	 */
+	private String generateProcessUUID() {
 		if (this.log.isTraceEnabled()) {
 			this.log.trace(this.getClass().getSimpleName() + "#generateProcessUUID()");
 		}
